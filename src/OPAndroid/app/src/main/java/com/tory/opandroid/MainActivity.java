@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +14,7 @@ import java.sql.Statement;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity --->";
     private final static String name = "root";
     private final static String password = "DB123456";
     private final static String dbName = "op.db";
@@ -20,10 +22,9 @@ public class MainActivity extends AppCompatActivity {
     private final static String tableNameUser = "user";
     private final static String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 
-
-    private static final String TAG = "MainActivity --->";
-
-
+    //private static final String DB_URL = "jdbc:mysql://localhost:3306/op.db?characterEncoding=utf8&useSSL=false&serverTimezone=UTC";
+    //private static final String DB_URL = "jdbc:mysql://localhost:3306/op.db";
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/op.db?user=root&password=DB123456&useSSL=false&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false&verifyServerCertificate=false";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,34 +39,34 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             try {
                                 Class.forName(JDBC_DRIVER);
-                                Log.d(TAG, "onCreate: load driver ok");
+                                Log.d(TAG, "load driver ok");
 
-                                try {
-                                    //java.sql.Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/op.db", name, password);
-                                    java.sql.Connection cn = DriverManager.getConnection(
-                                            "jdbc:mysql://127.0.0.1:3306/op.db?user=root&password=DB123456useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false");
+                                Connection cn = DriverManager.getConnection(DB_URL);
+                                Log.d(TAG, "get connection ok");
 
-                                    String sql = "select * from user";
+                                String sql = "select * from user";
+                                Statement st = cn.createStatement();
+                                Log.d(TAG, "createStatement ok");
 
-                                    Statement st= cn.createStatement();
-                                    ResultSet rs=st.executeQuery(sql);
-                                    while(rs.next()){
-                                        String name=rs.getString("name");
-                                        Log.d(TAG, "name is " + name);
-                                    }
+                                ResultSet rs = st.executeQuery(sql);
+                                Log.d(TAG, "query ok");
 
-                                    rs.close();
-                                    st.close();
-                                    cn.close();
-
-                                    Log.d(TAG, "done");
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
+                                while (rs.next()) {
+                                    String name = rs.getString("name");
+                                    Log.d(TAG, "name is " + name);
                                 }
 
+                                rs.close();
+                                st.close();
+                                cn.close();
+
+                                Log.d(TAG, "done");
+
                             } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
+                                Log.e(TAG, "run: class not found", e);
+                            }
+                            catch (SQLException e) {
+                                Log.e(TAG, "run: SQL exception", e);
                             }
                         }
                     }).start();
