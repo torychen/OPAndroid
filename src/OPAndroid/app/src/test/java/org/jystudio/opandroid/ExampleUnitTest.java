@@ -1,4 +1,4 @@
-package com.tory.opandroid;
+package org.jystudio.opandroid;
 
 import org.junit.Test;
 

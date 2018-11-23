@@ -1,4 +1,4 @@
-package com.tory.opandroid;
+package org.jystudio.opandroid;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.tory.opandroid", appContext.getPackageName());
+        assertEquals("org.jystudio.opandroid", appContext.getPackageName());
     }
 }
