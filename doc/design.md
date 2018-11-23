@@ -47,6 +47,26 @@ org.jystudio.register.service
 org.jystudio.register.action
 org.jystudio.register.dao
 
+CREATE TABLE `question` (
+  `id` int(8) NOT NULL AUTO_INCREMENT,
+  `submitter` varchar(20) DEFAULT '小明' COMMENT '问题提交人',
+  `knower` varchar(20) DEFAULT '我不知道' COMMENT '交提答案的人',
+  `datetime` datetime DEFAULT NULL,
+  `language` varchar(10) DEFAULT 'java',
+  `sort` varchar(10) DEFAULT NULL COMMENT '分类，如算法，数据结构，数据库',
+  `company` varchar(20) DEFAULT NULL COMMENT '你懂的',
+  `rate` int(1) DEFAULT '1' COMMENT '评分',
+  `blame` char(1) DEFAULT '0' COMMENT '举报',
+  `body` varchar(1000) NOT NULL COMMENT '你的问题',
+  `answer` varchar(1000) DEFAULT NULL COMMENT '答案',
+  `img` blob,
+  `heat` int(1) unsigned zerofill DEFAULT '1' COMMENT '最近被问到的次数',
+  `syncflag1` int(1) DEFAULT '0' COMMENT '同步标记1',
+  `syncflag2` int(1) DEFAULT '0' COMMENT '同步标记2',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+
 
 ### usecase
 usecase 001 DBUtil ， 访问MySQL 数据库。 用PrepareStement 提供增删改操作， 查操作。 【老罗视频 jdbc 编程】
