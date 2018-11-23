@@ -1,6 +1,23 @@
 ## OP
 
+## Eclipse shortcut
+Ctrl + D                delete line
+Alt+Shift+Up            duplicate line
+Alt + Up/Down           move line
+
+Alt + /                 auto complete
+
+Ctrl+Shift+F            格式化代码
+
+自动补全
+windows/preference/java/editor/code assistant 改为
+
+.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+
 ## 命令约定
+
+OP              One Piece
+JSStudio        Jiu Yan(nine eyes)
 
 ---
 ### 通用
@@ -46,10 +63,39 @@ usecase 005 本地数据库和网络数据同步
 
 ## plan
 
-
-
-
 2018-11-23
 服务器端， eclipse 项目上 github
 见数据库
 usecase 001， 002， 003
+
+
+
+```
+submit.jsp
+<!-- my implementation -->
+
+<div align="center" style="margin-top: 50px;">
+ 
+        <form action="theurl">
+            Please enter your Username:  <input type="text" name="username" size="20px"> <br>
+            Please enter your Password:  <input type="text" name="password" size="20px"> <br><br>
+        <input type="submit" value="submit">
+        </form>
+ 
+</div>
+```
+
+
+### Q&A
+### 无法识别 javax.servlet annotation
+```
+在eclipse里面 Project ->Properties，在左边找到Java Builder Path，单击，在右边找到Libraries，然后Add External Jars，找到“\Tomcat 7.0\lib\servlet-api.jar”。
+
+以前创建的一个项目，打开的时候总是报错。
+
+import javax.servlet.annotation.WebServlet;  
+
+后来想起当时这个项目是发布在tomcat7.0下面的， 也就是说当时这个项目buildpath下"add library->Server runtime是tomcat7.0，而现在我给这个项目添加的server runtime是tomcat 8.0，所以会出现这样的错误。当我改了server runtime为tomcat 7.0以后就没有报错了。
+```
+
+
