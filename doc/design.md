@@ -1,21 +1,8 @@
-## OP
+## OP Design
 
-## Eclipse shortcut
-Ctrl + D                delete line
-Alt+Shift+Up            duplicate line
-Alt + Up/Down           move line
 
-Alt + /                 auto complete
-
-Ctrl+Shift+F            格式化代码
-
-自动补全
-windows/preference/java/editor/code assistant 改为
-
-.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 ## 命令约定
-
 OP              One Piece
 JSStudio        Jiu Yan(nine eyes)
 
@@ -86,16 +73,5 @@ submit.jsp
 ```
 
 
-### Q&A
-### 无法识别 javax.servlet annotation
-```
-在eclipse里面 Project ->Properties，在左边找到Java Builder Path，单击，在右边找到Libraries，然后Add External Jars，找到“\Tomcat 7.0\lib\servlet-api.jar”。
-
-以前创建的一个项目，打开的时候总是报错。
-
-import javax.servlet.annotation.WebServlet;  
-
-后来想起当时这个项目是发布在tomcat7.0下面的， 也就是说当时这个项目buildpath下"add library->Server runtime是tomcat7.0，而现在我给这个项目添加的server runtime是tomcat 8.0，所以会出现这样的错误。当我改了server runtime为tomcat 7.0以后就没有报错了。
-```
 
 
