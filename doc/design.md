@@ -34,6 +34,26 @@ org.jystudio.register.service
 org.jystudio.register.action
 org.jystudio.register.dao
 
+CREATE TABLE `question` (
+  `id` int(8) NOT NULL AUTO_INCREMENT,
+  `submitter` varchar(20) DEFAULT '小明' COMMENT '问题提交人',
+  `knower` varchar(20) DEFAULT '我不知道' COMMENT '交提答案的人',
+  `datetime` datetime DEFAULT NULL,
+  `language` varchar(10) DEFAULT 'java',
+  `sort` varchar(10) DEFAULT NULL COMMENT '分类，如算法，数据结构，数据库',
+  `company` varchar(20) DEFAULT NULL COMMENT '你懂的',
+  `rate` int(1) DEFAULT '1' COMMENT '评分',
+  `blame` char(1) DEFAULT '0' COMMENT '举报',
+  `body` varchar(1000) NOT NULL COMMENT '你的问题',
+  `answer` varchar(1000) DEFAULT NULL COMMENT '答案',
+  `img` blob,
+  `heat` int(1) unsigned zerofill DEFAULT '1' COMMENT '最近被问到的次数',
+  `syncflag1` int(1) DEFAULT '0' COMMENT '同步标记1',
+  `syncflag2` int(1) DEFAULT '0' COMMENT '同步标记2',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+
 
 ### usecase
 usecase 001 DBUtil ， 访问MySQL 数据库。 用PrepareStement 提供增删改操作， 查操作。 【老罗视频 jdbc 编程】
@@ -43,7 +63,24 @@ usecase 004 可以提交问题，或提交答案。
 usecase 005 问题可以被举报，不能被删除
 usecase 006 答案可以被修改，显示修改人名称。 相信答案不会被恶意篡改，如wiki
 
-usecase 005 本地数据库和网络数据同步
+usecase 007 本地离线数据库和网络数据同步
+usecase 008 数据库怎样让git 管理每个人手一份。
+
+usecase 009 主页分查询和提交问题两个按钮，分别跳转。用户成功提交了问题后，应该转到查询结果的网页，显示最新问题的标题。
+
+usecase 010 问题怎样查询有重复的？
+
+usecase 011 数据库怎样让git 管理每个人手一份。
+
+usecase 012 数据库加 title 字段
+
+
+
+
+
+
+
+
  
 
 
