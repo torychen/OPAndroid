@@ -1,16 +1,16 @@
 package org.jystudio.opandroid;
 
-import android.app.Activity;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jystudio.opandroid.Service.Question;
 
@@ -20,6 +20,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -47,11 +48,16 @@ public class MainActivity extends AppCompatActivity {
             if (msg.what == 1) {
                 String stringFromServer = (String) msg.obj;
                 Log.d(TAG, "handleMessage: str" + stringFromServer);
-                //final Question question = new Gson().fromJson(stringFromServer, Question.class);
-                //Log.d(TAG, "handleMessage: quesion id " + question.getId() + " body " + question.getBody());
-                TextView textView =  activityWeakReference.get().findViewById(R.id.tvHello);
-                textView.setText(stringFromServer);
+                activityWeakReference.get().parseJSONArray(stringFromServer);
             }
+        }
+    }
+
+    void parseJSONArray(String jsonData) {
+        Gson gson = new Gson();
+        List<Question> list = gson.fromJson(jsonData, new TypeToken<List<Question>>(){}.getType());
+        for (Question question : list) {
+            Log.d(TAG, "parseJSONArray: id" + question.getId() + " body " + question.getBody());
         }
     }
 
