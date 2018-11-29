@@ -11,7 +11,7 @@ public class MyConstant {
     final public static String DB_QUESTION_TABLE_MODIFIER = "modifier";
     final public static String DB_QUESTION_TABLE_DATETIME = "datetime";
     final public static String DB_QUESTION_TABLE_LANGUAGE = "language";
-    final public static String DB_QUESTION_TABLE_FILTER = "filter";
+    final public static String DB_QUESTION_TABLE_CATEGORY = "category";
     final public static String DB_QUESTION_TABLE_COMPANY = "company";
     final public static String DB_QUESTION_TABLE_RATE = "rate";
     final public static String DB_QUESTION_TABLE_IMGPATH = "imgpath";
