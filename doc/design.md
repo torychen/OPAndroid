@@ -55,13 +55,27 @@ CREATE TABLE `question` (
 
 
 
-### usecase
+### usecase 022
+usecase 022 `应用程序`可以根据`当前复习题清单`制定默认的复习计划
+usecase 021 `用户`可以根据`当前复习题清单`制定复习计划
+usecase 020 用户可以查看`当前复习题清单`
+
+usecase 019 用户可以查看`当前问题`的详细信息
+usecase 018 用户可以标记跳过`当前问题`
+usecase 017 用户可以标记将当前问题作为复习题
+usecase 004 用户可以提交问题，或修改答案。 
+usecase 005 `普通用户`可以举报问题违反法律法规，或者重复，但是不能删除问题
+usecase 006 `普通用户`可以修改问题答案，应用程序显示最后修改人名称，时间。 相信答案不会被恶意篡改，如wiki
+
+
+usecase 016 用户可以设置自动更新`数据库`
+usecase 015 用户可以手动更新数据库
+usecase 014 服务器可以通知用户，数据库有更新
+usecase 013 用户可以查询当前数据库有没有更新
+
 usecase 001 DBUtil ， 访问MySQL 数据库。 用PrepareStement 提供增删改操作， 查操作。 【老罗视频 jdbc 编程】
 usecase 002 服务器端， 网页 用 post 方法 提交表单到数据库
 usecase 003 手机端，  访问 web server 的 提交表单到数据库
-usecase 004 可以提交问题，或提交答案。 
-usecase 005 问题可以被举报，不能被删除
-usecase 006 答案可以被修改，显示修改人名称。 相信答案不会被恶意篡改，如wiki
 
 usecase 007 本地离线数据库和网络数据同步
 usecase 008 数据库怎样让git 管理每个人手一份。
@@ -72,7 +86,14 @@ usecase 010 问题怎样查询有重复的？
 
 usecase 011 数据库怎样让git 管理每个人手一份。
 
+
+
+---
+done
+
 usecase 012 数据库加 title 字段
+
+
 
 
 
