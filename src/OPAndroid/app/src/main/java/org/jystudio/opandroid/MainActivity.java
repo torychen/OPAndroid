@@ -114,8 +114,9 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    /* ------------------------------------------------------------------ */
     //Not sure why fail to connect MySql.
-    void tryToConnectMySqlServer () {
+    /*void tryToConnectMySqlServer () {
         final String name = "root";
         final String password = "DB123456";
         final String dbName = "op.db";
@@ -158,6 +159,6 @@ public class MainActivity extends AppCompatActivity {
         catch (SQLException e) {
             Log.e(TAG, "run: SQL exception", e);
         }
-    }
+    }*/
 
 }
