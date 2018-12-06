@@ -4,13 +4,16 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.jystudio.opandroid.database.service.MyConstant;
+
 public class MyDbHelper extends SQLiteOpenHelper {
-    static  int version = 1;
+    private  static  int version = 1;
 
-    final static String name = "op.db";
+    private final static String name = MyConstant.DB_NAME;
 
-    final  static  String CREATE_TABLE = "CREATE TABLE `question` ("
-            +"`id` integer NOT NULL primary key autoincrement, "
+    private final  static  String CREATE_TABLE = "CREATE TABLE "
+            + MyConstant.DB_QUESTION_TABLE_NAME
+            +"(`id` integer NOT NULL primary key autoincrement, "
             +"`title` varchar(20) ,"
             +"`body` text NOT NULL ,"
             +"`answer` text ,"
@@ -32,7 +35,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         super(context, name, factory, version);
     }
 
-    public MyDbHelper(Context context) {
+    MyDbHelper(Context context) {
         super(context, name, null, version);
     }
 
