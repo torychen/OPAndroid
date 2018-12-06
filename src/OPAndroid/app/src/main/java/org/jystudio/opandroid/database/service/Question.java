@@ -1,4 +1,4 @@
-package org.jystudio.opandroid.Service;
+package org.jystudio.opandroid.database.service;
 
 
 public class Question {
@@ -50,12 +50,12 @@ public class Question {
         this.modifier = modifier;
     }
 
-    public String getDatetime() {
-        return datetime;
+    public String getLastmodify() {
+        return lastmodify;
     }
 
-    public void setDatetime(String datetime) {
-        this.datetime = datetime;
+    public void setLastmodify(String lastmodify) {
+        this.lastmodify = lastmodify;
     }
 
     public String getLanguage() {
@@ -66,13 +66,7 @@ public class Question {
         this.language = language;
     }
 
-    public String getFilter() {
-        return filter;
-    }
 
-    public void setFilter(String filter) {
-        this.filter = filter;
-    }
 
     public String getCompany() {
         return company;
@@ -130,15 +124,23 @@ public class Question {
         this.duplicate = duplicate;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     private String id          ;
     private String title       ;
     private String body        ;
     private String answer      ;
     private String submitter   ;
     private String modifier    ;
-    private String datetime    ;
+    private String lastmodify  ;
     private String language    ;
-    private String filter      ;
+    private String category    ;
     private String company     ;
     private String rate        ;
     private String imgpath     ;
@@ -146,8 +148,4 @@ public class Question {
     private String syncflag    ;
     private String blame       ;
     private String duplicate   ;
-
-
-
-
 }

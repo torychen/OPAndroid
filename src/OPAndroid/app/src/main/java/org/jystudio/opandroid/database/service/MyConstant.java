@@ -1,4 +1,4 @@
-package org.jystudio.opandroid.Service;
+package org.jystudio.opandroid.database.service;
 
 public class MyConstant {
     final public static String DB_NAME = "op.db";
@@ -9,7 +9,7 @@ public class MyConstant {
     final public static String DB_QUESTION_TABLE_ANSWER = "answer";
     final public static String DB_QUESTION_TABLE_SUBMITTER = "submitter";
     final public static String DB_QUESTION_TABLE_MODIFIER = "modifier";
-    final public static String DB_QUESTION_TABLE_DATETIME = "datetime";
+    final public static String DB_QUESTION_TABLE_LASTMODIFY = "lastmodify";
     final public static String DB_QUESTION_TABLE_LANGUAGE = "language";
     final public static String DB_QUESTION_TABLE_CATEGORY = "category";
     final public static String DB_QUESTION_TABLE_COMPANY = "company";
@@ -19,4 +19,14 @@ public class MyConstant {
     final public static String DB_QUESTION_TABLE_SYNCFLAG = "syncflag";
     final public static String DB_QUESTION_TABLE_BLAME = "blame";
     final public static String DB_QUESTION_TABLE_DUPLICATE = "duplicate";
+
+    //Sync flag
+    final public static int SYNC_FLAG_SERVER_ADD = 0;
+    final public static int SYNC_FLAG_SERVER_MODIFY = 1;
+    final public static int SYNC_FLAG_SERVER_DEL = 2;
+    final public static int SYNC_FLAG_LOCAL_ADD = 3;
+    final public static int SYNC_FLAG_LOCAL_MODIFY = 4;
+    final public static int SYNC_FLAG_LOCAL_DEL = 5;
+
+
 }

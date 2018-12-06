@@ -35,23 +35,24 @@ org.jystudio.register.action
 org.jystudio.register.dao
 
 CREATE TABLE `question` (
-  `id` int(8) NOT NULL AUTO_INCREMENT,
+  `id` int(8) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `title` varchar(20) DEFAULT '最新面试题' COMMENT '标题',
+  `body` text NOT NULL COMMENT '你的问题',
+  `answer` text COMMENT '答案',
   `submitter` varchar(20) DEFAULT '小明' COMMENT '问题提交人',
-  `knower` varchar(20) DEFAULT '我不知道' COMMENT '交提答案的人',
-  `datetime` datetime DEFAULT NULL,
-  `language` varchar(10) DEFAULT 'java',
-  `sort` varchar(10) DEFAULT NULL COMMENT '分类，如算法，数据结构，数据库',
+  `modifier` varchar(20) DEFAULT '我不知道' COMMENT '交提答案的人',
+  `lastmodify` datetime DEFAULT NULL,
+  `language` varchar(10) DEFAULT 'common',
+  `category` varchar(10) DEFAULT NULL COMMENT '分类，如算法，数据结构，数据库',
   `company` varchar(20) DEFAULT NULL COMMENT '你懂的',
   `rate` int(1) DEFAULT '1' COMMENT '评分',
-  `blame` char(1) DEFAULT '0' COMMENT '举报',
-  `body` varchar(1000) NOT NULL COMMENT '你的问题',
-  `answer` varchar(1000) DEFAULT NULL COMMENT '答案',
-  `img` blob,
-  `heat` int(1) unsigned zerofill DEFAULT '1' COMMENT '最近被问到的次数',
-  `syncflag1` int(1) DEFAULT '0' COMMENT '同步标记1',
-  `syncflag2` int(1) DEFAULT '0' COMMENT '同步标记2',
+  `imgpath` varchar(256) DEFAULT NULL COMMENT '图片的路径，而不是图片自身',
+  `heat` int(1) DEFAULT '1' COMMENT '最近被问到的次数',
+  `syncflag` int(1) DEFAULT '0' COMMENT '同步标记1',
+  `blame` int(1) DEFAULT '0' COMMENT '举报',
+  `duplicate` int(1) DEFAULT '0' COMMENT '是否是重复的问题',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
 
 
 
@@ -174,6 +175,7 @@ TODO SQLite 数据类型 和 MySQL的交集。 是否支持 datetime， int 范�
 
 
 ---
+
 ### done
 
 usecase 012 数据库加 title 字段
@@ -182,16 +184,15 @@ usecase 012 数据库加 title 字段
 
 
 
-
-
-
-
-
- 
-
-
-
 ## plan
+2018-12-06
+Android op.db, CRUD, 和 UT
+要求，建表项和MySQL 无缝对接。
+
+Q SQLite 的数据类型，到底有没有 datetime？ 如果有 datetime 怎样加上 毫秒 避免，以后时间戳重复。
+Q 单元测试怎样做？
+Q body 和 answer 到底用 vchar 还是 text
+
 
 2018-11-23
 服务器端， eclipse 项目上 github

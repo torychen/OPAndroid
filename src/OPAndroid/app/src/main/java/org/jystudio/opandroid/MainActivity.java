@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.jystudio.opandroid.Service.Question;
+import org.jystudio.opandroid.database.service.Question;
 
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
