@@ -2,11 +2,11 @@ package org.jystudio.opandroid.database.service;
 
 
 public class Question {
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -132,7 +132,7 @@ public class Question {
         this.category = category;
     }
 
-    private String id          ;
+    private long id            ;
     private String title       ;
     private String body        ;
     private String answer      ;
@@ -148,4 +148,23 @@ public class Question {
     private String syncflag    ;
     private String blame       ;
     private String duplicate   ;
+
+    public Question(String body) {
+       id = 0;
+       title      = "最新面试题"  ;
+       this.body  = body  ;
+       answer     = "我不知道"  ;
+       submitter  = "小明"  ;
+       modifier   = "小明"  ;
+       lastmodify = MyConstant.MY_D_DAY_DATETIME  ;
+       language   = "common"  ;
+       category   = "na"  ;
+       company    = "你懂的"  ;
+       rate       = "1"  ;
+       imgpath    = "na"  ;
+       heat       = "1"  ;
+       syncflag   = Integer.toString(MyConstant.SYNC_FLAG_LOCAL_ADD)  ;
+       blame      = "0"  ;
+       duplicate  = "0"  ;
+    }
 }

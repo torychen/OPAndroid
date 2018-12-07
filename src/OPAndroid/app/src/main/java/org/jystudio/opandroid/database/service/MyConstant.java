@@ -31,4 +31,8 @@ public class MyConstant {
     //the constant timestamp when client insert to client database.
     //Ensure the timestamp is less than any record which is inserted to server database.
     final public static String MY_D_DAY_DATETIME = "1970-12-01 00:00:00";
+
+    //the beginning id for client insert to client database.
+    //Try to avoid id conflict with record whish is inserted into server database.
+    final public static int ID_BEGINNING_FOR_CLIENT_INSERT = 9999999;
 }
