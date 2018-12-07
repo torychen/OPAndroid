@@ -4,12 +4,14 @@ package org.jystudio.opandroid;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
+import org.jystudio.opandroid.database.service.DatabaseTableVersion;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
@@ -24,11 +26,12 @@ import static org.junit.Assert.assertTrue;
 public class DBUnitTest {
     private static Context context;
     private static MyDbDao dbDao;
+    private static final String TAG = "DBUnitTest" + MyConstant.DBG_LOG_PREFIX;
 
     @BeforeClass
     public static void setUp() {
         context = InstrumentationRegistry.getTargetContext();
-        dbDao = new MyDbDao(context);
+        dbDao = new MyDbDao(context, true);
     }
 
     @AfterClass
@@ -36,6 +39,7 @@ public class DBUnitTest {
         dbDao = null;
         context = null;
     }
+
 
     @Test
     public void getRecordCountTest(){
@@ -49,8 +53,14 @@ public class DBUnitTest {
 
     @Test
     public void getTableVersionTest() {
+        DatabaseTableVersion tableVersion = dbDao.getTableVersion(MyConstant.DB_QUESTION_TABLE_NAME);
+        Log.d(TAG, "getTableVersionTest: " + tableVersion.getRecordsNum());
+        Log.d(TAG, "getTableVersionTest: " + tableVersion.getLastModify());
+
+        assertTrue(tableVersion.getRecordsNum() > 0);
 
     }
+
 
 
 }

@@ -1,7 +1,10 @@
 package org.jystudio.opandroid.database.service;
 
 public class MyConstant {
+    final public static String DBG_LOG_PREFIX = "-->>";
+
     final public static String DB_NAME = "op.db";
+    final public static String DB_NAME_UT = "oput.db";
     final public static String DB_QUESTION_TABLE_NAME = "question";
     final public static String DB_QUESTION_TABLE_ID = "id";
     final public static String DB_QUESTION_TABLE_TITLE = "title";

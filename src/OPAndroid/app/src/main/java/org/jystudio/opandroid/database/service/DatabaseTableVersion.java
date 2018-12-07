@@ -1,17 +1,17 @@
 package org.jystudio.opandroid.database.service;
 
 public class DatabaseTableVersion {
-    private String recordsNum;
+    private long recordsNum;
     private String lastModify;
 
-    public DatabaseTableVersion(String recordsNum, String lastModify) {
+    public DatabaseTableVersion(long recordsNum, String lastModify) {
         this.recordsNum = recordsNum;
         this.lastModify = lastModify;
     }
 
     public boolean isEqual(DatabaseTableVersion databaseTableVersion) {
         boolean flag = false;
-        if ((this.recordsNum.equals(databaseTableVersion.getRecordsNum())) &&
+        if ((this.recordsNum == databaseTableVersion.getRecordsNum()) &&
                 (this.lastModify.equals(databaseTableVersion.getLastModify()))) {
             flag = true;
         }
@@ -27,11 +27,11 @@ public class DatabaseTableVersion {
         this.lastModify = lastModify;
     }
 
-    public String getRecordsNum() {
+    public long getRecordsNum() {
         return recordsNum;
     }
 
-    public void setRecordsNum(String recordsNum) {
+    public void setRecordsNum(long recordsNum) {
         this.recordsNum = recordsNum;
     }
 }

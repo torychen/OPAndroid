@@ -10,7 +10,6 @@ import org.jystudio.opandroid.database.service.IDBService;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +18,12 @@ public class MyDbDao implements IDBService {
     private MyDbHelper dbHelper;
     private SQLiteDatabase database = null;
 
-    public MyDbDao(Context context) {
-        dbHelper = new MyDbHelper(context);
+    public MyDbDao(Context context, boolean isForUt) {
+        if (isForUt){
+            dbHelper = new MyDbHelper(context, MyConstant.DB_NAME_UT);
+        } else {
+            dbHelper = new MyDbHelper(context, MyConstant.DB_NAME);
+        }
     }
 
     private void closeDb() {
@@ -39,7 +42,7 @@ public class MyDbDao implements IDBService {
             String sql = "select count(*), max(lastmodify)   from " + tableName;
             Cursor cursor = database.rawQuery(sql, null);
             if (cursor.moveToFirst()) {
-                String recordsNum = cursor.getString(0);
+                long recordsNum = cursor.getLong(0);
                 String lastModify = cursor.getString(1);
                 tableVersion = new DatabaseTableVersion(recordsNum, lastModify);
             }
@@ -172,16 +175,24 @@ public class MyDbDao implements IDBService {
         boolean flag = false;
 
         Question question = (Question) record;
+
+        //To avoid conflicts of the server created records,
+        // update id and lastmodify of a record which is client create and try to insert to local database.
         question.setLastmodify(MyConstant.MY_D_DAY_DATETIME);
 
         long id = getMaxId(tableName);
+        Log.d(TAG, "insert2Local: max id is " + Long.toString(id) + "\n");
+
         //This is the first local record to be inserted, use the special id instead.
         if(id < MyConstant.ID_BEGINNING_FOR_CLIENT_INSERT) {
             question.setId(MyConstant.ID_BEGINNING_FOR_CLIENT_INSERT);
         } else {
             //There already have some local records, then id++
-            question.setId(id++);
+            id++;
+            question.setId(id);
         }
+
+        Log.d(TAG, "insert2Local: question id is" + question.getId() + "\n");
 
         try {
             database = dbHelper.getWritableDatabase();
@@ -210,7 +221,7 @@ public class MyDbDao implements IDBService {
 
             String sql = sqlBuilder.toString();
 
-            Log.d(TAG, "insert2Local: the sql is: " + sql);
+            //ut pass Log.d(TAG, "insert2Local: the sql is: " + sql);
 
             String [] strings = new String[] {
                     Long.toString(question.getId()),
@@ -231,7 +242,7 @@ public class MyDbDao implements IDBService {
                     question.getDuplicate()
             };
 
-            Log.d(TAG, "insert2Local: the values is" + strings);
+            //why only show part? Log.d(TAG, "insert2Local: the values is" + strings.toString());
 
             database.execSQL(sql, strings);
 

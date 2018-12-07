@@ -9,8 +9,6 @@ import org.jystudio.opandroid.database.service.MyConstant;
 public class MyDbHelper extends SQLiteOpenHelper {
     private  static  int version = 1;
 
-    private final static String name = MyConstant.DB_NAME;
-
     private final  static  String CREATE_TABLE = "CREATE TABLE "
             + MyConstant.DB_QUESTION_TABLE_NAME
             +"(`id` integer NOT NULL primary key autoincrement, "
@@ -35,7 +33,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         super(context, name, factory, version);
     }
 
-    MyDbHelper(Context context) {
+     MyDbHelper(Context context, String name) {
         super(context, name, null, version);
     }
 
