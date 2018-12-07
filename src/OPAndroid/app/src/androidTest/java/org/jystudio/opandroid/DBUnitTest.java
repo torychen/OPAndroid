@@ -5,11 +5,15 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
+import org.jystudio.opandroid.database.service.DatabaseTableVersion;
 import org.jystudio.opandroid.database.service.MyConstant;
+import org.jystudio.opandroid.database.service.Question;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,17 +25,33 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class DBUnitTest {
     private static Context context;
+    private static MyDbDao dbDao;
 
     @BeforeClass
     public static void setUp() {
         context = InstrumentationRegistry.getTargetContext();
+        dbDao = new MyDbDao(context);
+    }
+
+    @AfterClass
+    public static void tearDwon() {
+        dbDao = null;
+        context = null;
     }
 
     @Test
     public void getRecordCountTest(){
-        MyDbDao dbDao = new MyDbDao(context);
+        Question question = new Question("the lifecycle of a Service.");
+        boolean flag = dbDao.insert2Local(MyConstant.DB_QUESTION_TABLE_NAME, question);
+        assertTrue(flag);
+
         long count = dbDao.getRecordCount(MyConstant.DB_QUESTION_TABLE_NAME);
         assertTrue(count > 0);
+    }
+
+    @Test
+    public void getTableVersionTest() {
+
     }
 
 
