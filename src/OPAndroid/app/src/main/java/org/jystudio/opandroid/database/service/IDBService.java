@@ -45,10 +45,10 @@ public interface IDBService {
      * 把当前记录的 id 更新为 当前表单中最大 id + 1
      * 当 客户端 增加记录的 id 和 服务器冲突时， 需要更新 客户端记录的id
      * @param tableName  表单名称
-     * @param id  记录唯一 id
+     * @param orgId  记录初始id， 会被更新为 新的 最大 id
      * @return 成功或失败
      */
-     boolean updateIdToMax(String tableName, long id);
+     boolean updateIdToNewMax(String tableName, long orgId);
 
     /***
      * 将一条客户端增加/修改的记录，同步到服务器 数据库
@@ -71,6 +71,8 @@ public interface IDBService {
 
     /***
      * 将一条服务器端增加/修改的记录，同步到 本地 数据库
+     * 如果 id 有冲突，说明本地数据库的记录占用了 当前 id。
+     * 把 本地数据库记录的 id 变更。
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 true false

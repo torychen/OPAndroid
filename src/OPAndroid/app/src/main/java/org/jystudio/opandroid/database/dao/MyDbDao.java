@@ -146,7 +146,7 @@ public class MyDbDao implements IDBService {
 
 
     @Override
-    public  boolean updateIdToMax(String tableName, long id) {
+    public  boolean updateIdToNewMax(String tableName, long orgId) {
         return false;
     }
 
@@ -166,7 +166,21 @@ public class MyDbDao implements IDBService {
 
     @Override
     public boolean sync2Local(String tableName, Object record) {
-        return false;
+        boolean flag;
+        Question question = (Question) record;
+        long orgId = question.getId();
+        if (isConflictId(tableName, orgId)) {
+            flag = updateIdToNewMax(tableName, orgId);
+
+            if (!flag) {
+                Log.e(TAG, "sync2Local: updateIdToNewMax() failed!", null);
+                return flag;
+            }
+        }
+
+        flag = insertRecord(tableName, question);
+
+        return flag;
     }
 
 
@@ -194,6 +208,13 @@ public class MyDbDao implements IDBService {
 
         Log.d(TAG, "insert2Local: question id is" + question.getId() + "\n");
 
+        flag = insertRecord(tableName, question);
+
+        return flag;
+    }
+
+    private boolean insertRecord(String tableName, Question question) {
+        boolean flag = false;
         try {
             database = dbHelper.getWritableDatabase();
             StringBuilder sqlBuilder = new StringBuilder("insert into  ");
@@ -253,7 +274,6 @@ public class MyDbDao implements IDBService {
         } finally {
             closeDb();
         }
-
         return flag;
     }
 
@@ -261,5 +281,11 @@ public class MyDbDao implements IDBService {
     public boolean delRecord(String tableName, Object record){
         return  false;
     }
+
+    boolean isConflictId(String tableName, long id) {
+        return true;
+    }
+
+
 
 }

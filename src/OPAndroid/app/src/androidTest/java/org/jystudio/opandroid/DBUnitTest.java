@@ -8,6 +8,7 @@ import android.util.Log;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
@@ -41,7 +42,8 @@ public class DBUnitTest {
     }
 
 
-    @Test
+    //UT pass
+    @Ignore
     public void getRecordCountTest(){
         Question question = new Question("the lifecycle of a Service.");
         boolean flag = dbDao.insert2Local(MyConstant.DB_QUESTION_TABLE_NAME, question);
@@ -51,7 +53,8 @@ public class DBUnitTest {
         assertTrue(count > 0);
     }
 
-    @Test
+    //UT pass
+    @Ignore
     public void getTableVersionTest() {
         DatabaseTableVersion tableVersion = dbDao.getTableVersion(MyConstant.DB_QUESTION_TABLE_NAME);
         Log.d(TAG, "getTableVersionTest: " + tableVersion.getRecordsNum());
@@ -60,6 +63,40 @@ public class DBUnitTest {
         assertTrue(tableVersion.getRecordsNum() > 0);
 
     }
+
+    @Test
+    public void sync2LocalTest() {
+        assertTrue(false);
+    }
+
+    @Test
+    public void findRecordsByLastModifyTest() {
+        assertTrue(false);
+    }
+
+    @Test
+    public void findLocalNewRecordsTest () {
+        assertTrue(false);
+    }
+    @Test
+    public void findRecordByIdTest () {
+        assertTrue(false);
+    }
+
+    @Test
+    public void updateIdToMaxTest() {
+        assertTrue(false);
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 
