@@ -6,12 +6,10 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
-import org.jystudio.opandroid.database.service.DatabaseTableVersion;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
@@ -34,7 +32,7 @@ public class DBUnitTest {
     }
 
     @AfterClass
-    public static void tearDwon() {
+    public static void tearDown() {
         dbDao = null;
         context = null;
     }
