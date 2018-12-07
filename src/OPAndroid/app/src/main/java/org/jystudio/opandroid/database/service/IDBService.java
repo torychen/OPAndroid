@@ -10,9 +10,9 @@ public interface IDBService {
      * 客户端据此判断是否需要同步。
      * @return 返回的 当前数据库的记录数 和 最后 更新时间戳。
      */
-    Map<String, Object> getDbVersion();
+    DatabaseTableVersion getTableVersion(String tableName);
     long getRecordCount(String tableName);
-    String getLasModify();
+    String getLasModify(String tableName);
 
     /**
      * 服务器，通过这个函数找到，需要同步给 客户端的 所有记录

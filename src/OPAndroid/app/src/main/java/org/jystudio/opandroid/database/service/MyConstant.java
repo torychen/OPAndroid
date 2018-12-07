@@ -28,5 +28,7 @@ public class MyConstant {
     final public static int SYNC_FLAG_LOCAL_MODIFY = 4;
     final public static int SYNC_FLAG_LOCAL_DEL = 5;
 
-
+    //the constant timestamp when client insert to client database.
+    //Ensure the timestamp is less than any record which is inserted to server database.
+    final public static String MY_D_DAY_DATETIME = "1970-12-01 00:00:00";
 }
