@@ -283,24 +283,24 @@ public class MyDbDao implements IDBService {
     }
 
     public boolean isConflictId(String tableName, long id) {
+        boolean isConflicted = true;
+
+        //Invalid id need to check details, so return conflict.
         if (id <= 0) {
-            return false;
+            return isConflicted;
         }
 
-        long returnId = 0;
         try {
             database = dbHelper.getReadableDatabase();
 
             String sql = "select id from " + tableName + " where id=" + Long.toString(id);
-            Log.d(TAG, "isConflictId: sql is:" + sql);
+            //pass ut Log.d(TAG, "isConflictId: sql is:" + sql);
 
             Cursor cursor = database.rawQuery(sql, null);
-            if (cursor.moveToFirst()) {
-                Log.d(TAG, "isConflictId: cursor return true ");
-
-                returnId = cursor.getLong(0);
-
-                Log.d(TAG, "isConflictId: getLong return: " + returnId);
+            if (!cursor.moveToFirst()) {
+                //pass ut Log.d(TAG, "isConflictId: cursor return nothing. ");
+                //find nothing, so NOT conflict.
+                isConflicted = false;
             }
 
             cursor.close();
@@ -310,28 +310,9 @@ public class MyDbDao implements IDBService {
             closeDb();
         }
 
-        return (returnId == id) ? true : false;
+        return isConflicted;
     }
 
-    /**
-     * execute a query by sql. user should close cursor.
-     * @param sql
-     * @return null when fail, a cursor when success.
-     */
-    Cursor rawQuery (String sql) {
-        Cursor cursor = null;
-        try {
-            database = dbHelper.getReadableDatabase();
-
-            cursor = database.rawQuery(sql, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            closeDb();
-        }
-
-        return cursor;
-    }
 
     boolean execSql(String sql, String [] strings, boolean isWriteableDb) {
         boolean flag = false;

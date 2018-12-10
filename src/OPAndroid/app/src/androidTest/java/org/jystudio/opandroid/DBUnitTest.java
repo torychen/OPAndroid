@@ -68,7 +68,7 @@ public class DBUnitTest {
     @Test
     public  void isConflictIdTest() {
         long invalidId = 0;
-        assertTrue(!dbDao.isConflictId(TABLE_NAME, invalidId));
+        assertTrue(dbDao.isConflictId(TABLE_NAME, invalidId));
 
         long maxId = dbDao.getMaxId(TABLE_NAME);
         assertTrue(maxId > 0);
