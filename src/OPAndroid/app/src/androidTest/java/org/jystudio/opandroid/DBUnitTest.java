@@ -87,17 +87,6 @@ public class DBUnitTest {
         assertTrue(!dbDao.isConflictId(TABLE_NAME, RESERVED_VALID_ID));
     }
 
-
-    @Test
-    public void updateIdToNewMaxTest() {
-
-        //find record by max id should return a question with TEST_PATTERN.
-
-
-        //update the record id to new max, then query a record via new max id,
-        //the question should has the TEST_PATTERN.
-    }
-
     @Test
     public void sync2LocalTestNoConflictedId() {
         //del the record before test to make sure no conflicted id.
@@ -128,6 +117,42 @@ public class DBUnitTest {
     }
 
     @Test
+    public void sync2LocalTestConflictedId() {
+        //del the record before test to make sure no conflicted id.
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        }
+
+        Question question = new Question(BODY_TEST_PATTERN);
+        question.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+
+        dbDao.sync2Local(TABLE_NAME, question);
+
+        long maxId = dbDao.getMaxId(TABLE_NAME);
+
+        //Try to insert the same id record with different body. the previous id record should be
+        //updated to the new max id.
+        final String TEMP_STRING = "temp-for-test";
+        Question sameIdQuestion = new Question(TEMP_STRING);
+        sameIdQuestion.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+        boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
+        assertTrue(flag);
+
+        long newMaxId = dbDao.getMaxId(TABLE_NAME);
+        assertEquals(maxId + 1, newMaxId);
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, newMaxId);
+        assertEquals(BODY_TEST_PATTERN, question.getBody());
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        assertEquals(TEMP_STRING, question.getBody());
+
+        dbDao.delRecord(TABLE_NAME, newMaxId);
+        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+    }
+
+    /*
+    @Test
     public void findRecordsByLastModifyTest() {
         assertTrue(false);
     }
@@ -136,15 +161,7 @@ public class DBUnitTest {
     public void findLocalNewRecordsTest () {
         assertTrue(false);
     }
-    @Test
-    public void findRecordByIdTest () {
-        assertTrue(false);
-    }
-
-    @Test
-    public void updateIdToMaxTest() {
-        assertTrue(false);
-    }
+    */
 
 
 
