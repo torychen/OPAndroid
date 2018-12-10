@@ -263,7 +263,7 @@ public class MyDbDao implements IDBService {
                     question.getDuplicate()
             };
 
-            //why only show part? Log.d(TAG, "insert2Local: the values is" + strings.toString());
+            //why only show part of strings? Log.d(TAG, "insert2Local: the values is" + strings.toString());
 
             database.execSQL(sql, strings);
 
@@ -282,8 +282,77 @@ public class MyDbDao implements IDBService {
         return  false;
     }
 
-    boolean isConflictId(String tableName, long id) {
-        return true;
+    public boolean isConflictId(String tableName, long id) {
+        if (id <= 0) {
+            return false;
+        }
+
+        long returnId = 0;
+        try {
+            database = dbHelper.getReadableDatabase();
+
+            String sql = "select id from " + tableName + " where id=" + Long.toString(id);
+            Log.d(TAG, "isConflictId: sql is:" + sql);
+
+            Cursor cursor = database.rawQuery(sql, null);
+            if (cursor.moveToFirst()) {
+                Log.d(TAG, "isConflictId: cursor return true ");
+
+                returnId = cursor.getLong(0);
+
+                Log.d(TAG, "isConflictId: getLong return: " + returnId);
+            }
+
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return (returnId == id) ? true : false;
+    }
+
+    /**
+     * execute a query by sql. user should close cursor.
+     * @param sql
+     * @return null when fail, a cursor when success.
+     */
+    Cursor rawQuery (String sql) {
+        Cursor cursor = null;
+        try {
+            database = dbHelper.getReadableDatabase();
+
+            cursor = database.rawQuery(sql, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return cursor;
+    }
+
+    boolean execSql(String sql, String [] strings, boolean isWriteableDb) {
+        boolean flag = false;
+        database = null;
+        try {
+
+            if (isWriteableDb) {
+                database = dbHelper.getWritableDatabase();
+            } else {
+                database = dbHelper.getReadableDatabase();
+            }
+
+            database.execSQL(sql, strings);
+            flag = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return flag;
     }
 
 

@@ -29,6 +29,8 @@ public class DBUnitTest {
     private static MyDbDao dbDao;
     private static final String TAG = "DBUnitTest" + MyConstant.DBG_LOG_PREFIX;
 
+    private static final String TABLE_NAME = MyConstant.DB_QUESTION_TABLE_NAME;
+
     @BeforeClass
     public static void setUp() {
         context = InstrumentationRegistry.getTargetContext();
@@ -46,22 +48,36 @@ public class DBUnitTest {
     @Ignore
     public void getRecordCountTest(){
         Question question = new Question("the lifecycle of a Service.");
-        boolean flag = dbDao.insert2Local(MyConstant.DB_QUESTION_TABLE_NAME, question);
+        boolean flag = dbDao.insert2Local(TABLE_NAME, question);
         assertTrue(flag);
 
-        long count = dbDao.getRecordCount(MyConstant.DB_QUESTION_TABLE_NAME);
+        long count = dbDao.getRecordCount(TABLE_NAME);
         assertTrue(count > 0);
     }
 
     //UT pass
     @Ignore
     public void getTableVersionTest() {
-        DatabaseTableVersion tableVersion = dbDao.getTableVersion(MyConstant.DB_QUESTION_TABLE_NAME);
+        DatabaseTableVersion tableVersion = dbDao.getTableVersion(TABLE_NAME);
         Log.d(TAG, "getTableVersionTest: " + tableVersion.getRecordsNum());
         Log.d(TAG, "getTableVersionTest: " + tableVersion.getLastModify());
 
         assertTrue(tableVersion.getRecordsNum() > 0);
+    }
 
+    @Test
+    public  void isConflictIdTest() {
+        long invalidId = 0;
+        assertTrue(!dbDao.isConflictId(TABLE_NAME, invalidId));
+
+        long maxId = dbDao.getMaxId(TABLE_NAME);
+        assertTrue(maxId > 0);
+
+        assertTrue(dbDao.isConflictId(TABLE_NAME, maxId));
+
+        //To test valid id but not exist yet.
+        long validButNotExistId = 1;
+        assertTrue(!dbDao.isConflictId(TABLE_NAME, validButNotExistId));
     }
 
     @Test
