@@ -16,6 +16,8 @@ import org.jystudio.opandroid.database.service.DatabaseTableVersion;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -151,16 +153,37 @@ public class DBUnitTest {
         dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
     }
 
+    @Test
+    public void findLocalNewRecordsTest () {
+        boolean flag;
+        final int RECORDS_CNT = 3;
+        for (int i = 0; i < RECORDS_CNT; i++) {
+            Question question = new Question("test findLocalNewRecordsTest" + i);
+            flag = dbDao.insert2Local(TABLE_NAME, question);
+            assertTrue(flag);
+        }
+
+        //Be careful, this will return all new records.
+        List<Object> list = dbDao.findLocalNewRecords(TABLE_NAME);
+        assertTrue(list != null);
+        assertTrue(list.size() >= 3);
+
+        /*//For debug purpose.
+        Question question;
+        for (Object object : list) {
+            question = (Question) object;
+            Log.d(TAG, "findLocalNewRecordsTest: " +
+                    question.toString());
+        }*/
+    }
+
     /*
     @Test
     public void findRecordsByLastModifyTest() {
         assertTrue(false);
     }
 
-    @Test
-    public void findLocalNewRecordsTest () {
-        assertTrue(false);
-    }
+
     */
 
 

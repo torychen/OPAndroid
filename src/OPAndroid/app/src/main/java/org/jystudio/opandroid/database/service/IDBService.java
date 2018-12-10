@@ -23,14 +23,14 @@ public interface IDBService {
      * @param count 默认同步 10 条记录。 避免数据太多。
      * @return 返回记录的集合。 失败则返回空。
      */
-    List<Map<String,Object>> findRecordsByLastModify(String tableName, String lastModify, int count);
+    List<Object> findRecordsByLastModify(String tableName, String lastModify, int count);
 
     /**
      * 通过 sync flag 找出客户端 增加，修改过的记录
      * @param tableName  表单名称
      * @return 记录列表
      */
-    List<Map<String,Object>> findLocalNewRecords(String tableName);
+    List<Object> findLocalNewRecords(String tableName);
 
     Object findRecordById(String tableName, long id);
 

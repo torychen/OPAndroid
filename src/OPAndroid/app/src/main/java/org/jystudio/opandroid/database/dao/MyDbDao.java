@@ -3,6 +3,7 @@ package org.jystudio.opandroid.database.dao;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.jystudio.opandroid.database.service.DatabaseTableVersion;
@@ -10,8 +11,11 @@ import org.jystudio.opandroid.database.service.IDBService;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.jystudio.opandroid.database.service.MyConstant.*;
 
 public class MyDbDao implements IDBService {
     private static final String TAG = "MyDbDao -->>";
@@ -106,14 +110,37 @@ public class MyDbDao implements IDBService {
 
 
     @Override
-    public List<Map<String,Object>> findRecordsByLastModify(String tableName, String lastModify, int count){
+    public List<Object> findRecordsByLastModify(String tableName, String lastModify, int count){
         return null;
     }
 
 
     @Override
-    public List<Map<String,Object>> findLocalNewRecords(String tableName){
-        return null;
+    public List<Object> findLocalNewRecords(String tableName){
+        List<Object> list = new ArrayList<>();
+
+        Question question;
+        try {
+            database = dbHelper.getReadableDatabase();
+
+            String sql = "select * from " + tableName + " where syncflag>=" + SYNC_FLAG_LOCAL_ADD;
+
+            Log.d(TAG, "findLocalNewRecords: the sql is " + sql);
+
+            Cursor cursor = database.rawQuery(sql, null);
+            while (cursor.moveToNext()) {
+                question = getQuestion(cursor);
+                list.add(question);
+            }
+
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return list;
     }
 
     @Override
@@ -129,35 +156,42 @@ public class MyDbDao implements IDBService {
             String sql = "select * from " + tableName + " where id=" + Long.toString(id);
             Cursor cursor = database.rawQuery(sql, null);
             if (cursor.moveToFirst()) {
-                question = new Question("na");
-
-                question.setId(cursor.getLong(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ID)));
-                question.setTitle(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_TITLE)));
-                question.setBody(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BODY)));
-                question.setAnswer(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ANSWER)));
-                question.setSubmitter(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SUBMITTER)));
-                question.setModifier(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_MODIFIER)));
-                question.setLastmodify(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LASTMODIFY)));
-                question.setLanguage(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LANGUAGE)));
-                question.setCategory(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_CATEGORY)));
-                question.setCompany(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_COMPANY)));
-                question.setRate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_RATE)));
-                question.setImgpath(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_IMGPATH)));
-                question.setHeat(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_HEAT)));
-                question.setSyncflag(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SYNCFLAG)));
-                question.setBlame(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BLAME)));
-                question.setDuplicate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_DUPLICATE)));
+                question = getQuestion(cursor);
             }
 
             cursor.close();
 
-            //ut pass Log.d(TAG, "findRecordById: the quesion is " + question.toString());
+            //Log.d(TAG, "findRecordById: the quesion is " + question.toString());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeDb();
         }
 
+        return question;
+    }
+
+    @NonNull
+    private Question getQuestion(Cursor cursor) {
+        Question question;
+        question = new Question("na");
+
+        question.setId(cursor.getLong(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ID)));
+        question.setTitle(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_TITLE)));
+        question.setBody(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BODY)));
+        question.setAnswer(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ANSWER)));
+        question.setSubmitter(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SUBMITTER)));
+        question.setModifier(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_MODIFIER)));
+        question.setLastmodify(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LASTMODIFY)));
+        question.setLanguage(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LANGUAGE)));
+        question.setCategory(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_CATEGORY)));
+        question.setCompany(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_COMPANY)));
+        question.setRate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_RATE)));
+        question.setImgpath(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_IMGPATH)));
+        question.setHeat(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_HEAT)));
+        question.setSyncflag(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SYNCFLAG)));
+        question.setBlame(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BLAME)));
+        question.setDuplicate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_DUPLICATE)));
         return question;
     }
 
@@ -241,7 +275,7 @@ public class MyDbDao implements IDBService {
 
             if (!flag) {
                 Log.e(TAG, "sync2Local: updateIdToNewMax() failed!", null);
-                return flag;
+                return false;
             }
         }
 
