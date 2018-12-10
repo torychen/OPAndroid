@@ -171,4 +171,26 @@ public class Question {
        blame      = "blame 0"  ;
        duplicate  = "duplicate 0"  ;
     }
+
+    @Override
+    public String toString() {
+        return "Question[{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", body='" + body + '\'' +
+                ", answer='" + answer + '\'' +
+                ", submitter='" + submitter + '\'' +
+                ", modifier='" + modifier + '\'' +
+                ", lastmodify='" + lastmodify + '\'' +
+                ", language='" + language + '\'' +
+                ", category='" + category + '\'' +
+                ", company='" + company + '\'' +
+                ", rate='" + rate + '\'' +
+                ", imgpath='" + imgpath + '\'' +
+                ", heat='" + heat + '\'' +
+                ", syncflag='" + syncflag + '\'' +
+                ", blame='" + blame + '\'' +
+                ", duplicate='" + duplicate + '\'' +
+                "}]";
+    }
 }

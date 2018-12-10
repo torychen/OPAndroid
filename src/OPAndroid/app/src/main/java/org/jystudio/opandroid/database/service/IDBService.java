@@ -32,7 +32,7 @@ public interface IDBService {
      */
     List<Map<String,Object>> findLocalNewRecords(String tableName);
 
-    Map<String, Object> findRecordById(String tableName, long id);
+    Object findRecordById(String tableName, long id);
 
     /**
      * 获得当前表单中 最大 id， 当 客户端 增加的 记录 id 和 服务器冲突时， 需要更新 客户端记录的id。
@@ -96,7 +96,13 @@ public interface IDBService {
     boolean insert2Local(String tableName, Object record);
 
 
-    boolean delRecord(String tableName, Object record);
+    /**
+     * del a record by id.
+     * @param tableName the table name.
+     * @param id the id
+     * @return true or false
+     */
+    boolean delRecord(String tableName, long id);
 
 
 }

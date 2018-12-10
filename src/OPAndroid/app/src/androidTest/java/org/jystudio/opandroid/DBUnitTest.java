@@ -32,6 +32,13 @@ public class DBUnitTest {
 
     private static final String TABLE_NAME = MyConstant.DB_QUESTION_TABLE_NAME;
 
+    private static final long RESERVED_VALID_ID = 1;
+    private static final long ID_FOR_TEST_SYNC_2_LOCAL = 2;
+
+    private static final String BODY_TEST_PATTERN = "!@#$123456";
+
+
+
     @BeforeClass
     public static void setUp() {
         context = InstrumentationRegistry.getTargetContext();
@@ -77,25 +84,47 @@ public class DBUnitTest {
         assertTrue(dbDao.isConflictId(TABLE_NAME, maxId));
 
         //To test valid id but not exist yet.
-        long validButNotExistId = 1;
-        assertTrue(!dbDao.isConflictId(TABLE_NAME, validButNotExistId));
+        assertTrue(!dbDao.isConflictId(TABLE_NAME, RESERVED_VALID_ID));
     }
+
 
     @Test
     public void updateIdToNewMaxTest() {
-        long orgMaxId = dbDao.getMaxId(TABLE_NAME);
 
-        dbDao.updateIdToNewMax(TABLE_NAME, orgMaxId);
-        long newMaxId = dbDao.getMaxId(TABLE_NAME);
-
-        assertEquals((orgMaxId + 1), newMaxId);
+        //find record by max id should return a question with TEST_PATTERN.
 
 
+        //update the record id to new max, then query a record via new max id,
+        //the question should has the TEST_PATTERN.
     }
 
     @Test
-    public void sync2LocalTest() {
-        assertTrue(false);
+    public void sync2LocalTestNoConflictedId() {
+        //del the record before test to make sure no conflicted id.
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        }
+
+        Question question = new Question(BODY_TEST_PATTERN);
+        question.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+
+        boolean flag = dbDao.sync2Local(TABLE_NAME, question);
+        assertTrue(flag);
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        if (question != null) {
+            assertEquals(BODY_TEST_PATTERN, question.getBody());
+        } else {
+            //Something wrong.
+            assertTrue(false);
+        }
+
+        //del the record.
+        flag = dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        assertTrue(flag);
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        assertTrue(question == null);
     }
 
     @Test

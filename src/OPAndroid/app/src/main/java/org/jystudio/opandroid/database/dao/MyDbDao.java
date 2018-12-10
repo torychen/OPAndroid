@@ -117,8 +117,48 @@ public class MyDbDao implements IDBService {
     }
 
     @Override
-    public Map<String, Object> findRecordById(String tableName, long id) {
-        return null;
+    public Object findRecordById(String tableName, final long id) {
+        if (id <= 0) {
+            return null;
+        }
+
+        Question question = null;
+        try {
+            database = dbHelper.getReadableDatabase();
+
+            String sql = "select * from " + tableName + " where id=" + Long.toString(id);
+            Cursor cursor = database.rawQuery(sql, null);
+            if (cursor.moveToFirst()) {
+                question = new Question("na");
+
+                question.setId(cursor.getLong(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ID)));
+                question.setTitle(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_TITLE)));
+                question.setBody(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BODY)));
+                question.setAnswer(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_ANSWER)));
+                question.setSubmitter(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SUBMITTER)));
+                question.setModifier(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_MODIFIER)));
+                question.setLastmodify(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LASTMODIFY)));
+                question.setLanguage(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_LANGUAGE)));
+                question.setCategory(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_CATEGORY)));
+                question.setCompany(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_COMPANY)));
+                question.setRate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_RATE)));
+                question.setImgpath(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_IMGPATH)));
+                question.setHeat(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_HEAT)));
+                question.setSyncflag(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_SYNCFLAG)));
+                question.setBlame(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_BLAME)));
+                question.setDuplicate(cursor.getString(cursor.getColumnIndex(MyConstant.DB_QUESTION_TABLE_DUPLICATE)));
+            }
+
+            cursor.close();
+
+            //ut pass Log.d(TAG, "findRecordById: the quesion is " + question.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return question;
     }
 
 
@@ -213,12 +253,12 @@ public class MyDbDao implements IDBService {
 
     @Override
     public boolean insert2Local(String tableName, Object record) {
-        boolean flag = false;
+        boolean flag;
 
         Question question = (Question) record;
 
         //To avoid conflicts of the server created records,
-        // update id and lastmodify of a record which is client create and try to insert to local database.
+        //update 'id' and 'lastmodify' of a record which is client create and try to insert to local database.
         question.setLastmodify(MyConstant.MY_D_DAY_DATETIME);
 
         long id = getMaxId(tableName);
@@ -312,9 +352,9 @@ public class MyDbDao implements IDBService {
 
     /**
      * insert exactly the input record except the 'id' field.
-     * @param tableName
-     * @param question
-     * @return
+     * @param tableName the table name
+     * @param question the record
+     * @return true or false
      */
     private boolean insertRecordAutoId(String tableName, Question question) {
         boolean flag = false;
@@ -379,18 +419,37 @@ public class MyDbDao implements IDBService {
     }
 
     @Override
-    public boolean delRecord(String tableName, Object record){
-        return  false;
+    public boolean delRecord(String tableName, long id){
+        if (id <= 0) {
+            return  false;
+        }
+
+        boolean flag = false;
+        try {
+            database = dbHelper.getWritableDatabase();
+
+            String sql = "delete from " + tableName + " where id=" + Long.toString(id);
+            Log.d(TAG, "delRecord: the sql is " + sql);
+
+            database.execSQL(sql);
+            flag = true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return flag;
     }
 
     public boolean isConflictId(String tableName, long id) {
-        boolean isConflicted = true;
-
         //Invalid id need to check details, so return conflict.
         if (id <= 0) {
-            return isConflicted;
+            return true;
         }
 
+        boolean isConflicted = true;
         try {
             database = dbHelper.getReadableDatabase();
 
