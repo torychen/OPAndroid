@@ -147,7 +147,34 @@ public class MyDbDao implements IDBService {
 
     @Override
     public  boolean updateIdToNewMax(String tableName, long orgId) {
-        return false;
+        if (orgId <= 0) {
+            return false;
+        }
+
+        long maxId = getMaxId(tableName);
+        if (maxId <= 0) {
+            return false;
+        }
+
+        maxId++;
+        boolean flag = false;
+        try {
+            database = dbHelper.getWritableDatabase();
+
+            String sql = "update " + tableName + " set id=" + Long.toString(maxId) + " where id=" + Long.toString(orgId);
+            Log.d(TAG, "updateIdToNewMax: the sql is " + sql);
+
+            database.execSQL(sql);
+            flag = true;
+            Log.d(TAG, "updateIdToNewMax: orgId is" + Long.toString(orgId) + "new id is " + Long.toString(maxId) );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return flag;
     }
 
 
@@ -213,6 +240,12 @@ public class MyDbDao implements IDBService {
         return flag;
     }
 
+    /**
+     * insert a record exactly the same as the input.
+     * @param tableName the table name
+     * @param question  the record.
+     * @return true or false
+     */
     private boolean insertRecord(String tableName, Question question) {
         boolean flag = false;
         try {
@@ -246,6 +279,74 @@ public class MyDbDao implements IDBService {
 
             String [] strings = new String[] {
                     Long.toString(question.getId()),
+                    question.getTitle(),
+                    question.getBody(),
+                    question.getAnswer(),
+                    question.getSubmitter(),
+                    question.getModifier(),
+                    question.getLastmodify(),
+                    question.getLanguage(),
+                    question.getCategory(),
+                    question.getCompany(),
+                    question.getRate(),
+                    question.getImgpath(),
+                    question.getHeat(),
+                    question.getSyncflag(),
+                    question.getBlame(),
+                    question.getDuplicate()
+            };
+
+            //why only show part of strings? Log.d(TAG, "insert2Local: the values is" + strings.toString());
+
+            database.execSQL(sql, strings);
+
+            flag = true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+        return flag;
+    }
+
+    /**
+     * insert exactly the input record except the 'id' field.
+     * @param tableName
+     * @param question
+     * @return
+     */
+    private boolean insertRecordAutoId(String tableName, Question question) {
+        boolean flag = false;
+        try {
+            database = dbHelper.getWritableDatabase();
+            StringBuilder sqlBuilder = new StringBuilder("insert into  ");
+            sqlBuilder.append(tableName + "(");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_TITLE + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_BODY + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_ANSWER + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_SUBMITTER + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_MODIFIER + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_LASTMODIFY + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_LANGUAGE + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_CATEGORY + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_COMPANY + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_RATE + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_IMGPATH + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_HEAT + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_SYNCFLAG + ",");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_BLAME + ",");
+            //last field
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_DUPLICATE + ")");
+
+            //15 space holder
+            sqlBuilder.append(" values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+            String sql = sqlBuilder.toString();
+
+            //ut pass Log.d(TAG, "insert2Local: the sql is: " + sql);
+
+            String [] strings = new String[] {
                     question.getTitle(),
                     question.getBody(),
                     question.getAnswer(),

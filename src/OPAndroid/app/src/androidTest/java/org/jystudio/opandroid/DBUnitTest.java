@@ -16,6 +16,7 @@ import org.jystudio.opandroid.database.service.DatabaseTableVersion;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -78,6 +79,18 @@ public class DBUnitTest {
         //To test valid id but not exist yet.
         long validButNotExistId = 1;
         assertTrue(!dbDao.isConflictId(TABLE_NAME, validButNotExistId));
+    }
+
+    @Test
+    public void updateIdToNewMaxTest() {
+        long orgMaxId = dbDao.getMaxId(TABLE_NAME);
+
+        dbDao.updateIdToNewMax(TABLE_NAME, orgMaxId);
+        long newMaxId = dbDao.getMaxId(TABLE_NAME);
+
+        assertEquals((orgMaxId + 1), newMaxId);
+
+
     }
 
     @Test
