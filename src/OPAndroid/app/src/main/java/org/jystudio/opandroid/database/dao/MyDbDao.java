@@ -22,12 +22,34 @@ public class MyDbDao implements IDBService {
     private MyDbHelper dbHelper;
     private SQLiteDatabase database = null;
 
+    private int resultCount = 10;
+
+    public MyDbDao (Context context) {
+        dbHelper = new MyDbHelper(context, MyConstant.DB_NAME);
+    }
+
     public MyDbDao(Context context, boolean isForUt) {
         if (isForUt){
             dbHelper = new MyDbHelper(context, MyConstant.DB_NAME_UT);
         } else {
             dbHelper = new MyDbHelper(context, MyConstant.DB_NAME);
         }
+    }
+
+
+    private boolean validateCount(final int count) {
+        return count > 0 && count < 99999;
+    }
+
+    @Override
+    public boolean setResultCount(int count) {
+        boolean flag = false;
+        if (validateCount(count)) {
+            flag = true;
+            resultCount = count;
+        }
+
+        return flag;
     }
 
     private void closeDb() {
@@ -108,24 +130,14 @@ public class MyDbDao implements IDBService {
         return lastModify;
     }
 
-
     @Override
-    public List<Object> findRecordsByLastModify(String tableName, String lastModify, int count){
-        return null;
-    }
+    public List<Object> findRecords(String tableName, String sql){
+        //ok Log.d(TAG, "findRecords: the sql is " + sql);
 
-
-    @Override
-    public List<Object> findLocalNewRecords(String tableName){
         List<Object> list = new ArrayList<>();
-
         Question question;
         try {
             database = dbHelper.getReadableDatabase();
-
-            String sql = "select * from " + tableName + " where syncflag>=" + SYNC_FLAG_LOCAL_ADD;
-
-            Log.d(TAG, "findLocalNewRecords: the sql is " + sql);
 
             Cursor cursor = database.rawQuery(sql, null);
             while (cursor.moveToNext()) {
@@ -141,6 +153,50 @@ public class MyDbDao implements IDBService {
         }
 
         return list;
+    }
+
+
+    @Override
+    public List<Object> findRecordsByLastModify(String tableName, String lastModify) {
+        return findRecordsByLastModify(tableName, lastModify, resultCount);
+    }
+
+    @Override
+    public List<Object> findRecordsByLastModify(String tableName, String lastModify, int count) {
+        if (!validateCount(count)) {
+            return null;
+        }
+
+        String sql = "select * from " +
+                tableName +
+                " where lastmodify>" +
+                "\'" + lastModify + "\'" +
+                " limit " + Integer.toString(count);
+
+        return findRecords(tableName, sql);
+    }
+
+
+    @Override
+    public List<Object> findLocalNewRecords(String tableName) {
+        return findLocalNewRecords(tableName, resultCount);
+    }
+
+    @Override
+    public List<Object> findLocalNewRecords(String tableName, int count){
+        if (!validateCount(count)) {
+            return null;
+        }
+
+        String sql = "select * from " +
+                tableName +
+                " where syncflag>=" +
+                SYNC_FLAG_LOCAL_ADD +
+                " limit " +
+                Integer.toString(count);
+
+
+        return findRecords(tableName, sql);
     }
 
     @Override
@@ -463,7 +519,7 @@ public class MyDbDao implements IDBService {
             database = dbHelper.getWritableDatabase();
 
             String sql = "delete from " + tableName + " where id=" + Long.toString(id);
-            Log.d(TAG, "delRecord: the sql is " + sql);
+            //ok Log.d(TAG, "delRecord: the sql is " + sql);
 
             database.execSQL(sql);
             flag = true;
@@ -506,30 +562,5 @@ public class MyDbDao implements IDBService {
 
         return isConflicted;
     }
-
-
-    boolean execSql(String sql, String [] strings, boolean isWriteableDb) {
-        boolean flag = false;
-        database = null;
-        try {
-
-            if (isWriteableDb) {
-                database = dbHelper.getWritableDatabase();
-            } else {
-                database = dbHelper.getReadableDatabase();
-            }
-
-            database.execSQL(sql, strings);
-            flag = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            closeDb();
-        }
-
-        return flag;
-    }
-
-
 
 }

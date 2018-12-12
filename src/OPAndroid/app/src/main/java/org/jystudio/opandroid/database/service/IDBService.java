@@ -6,6 +6,13 @@ import java.util.Map;
 public interface IDBService {
 
     /**
+     * 设置每次查询最大返回数量，默认10.
+     * @param count 数量
+     * @return true or false
+     */
+    boolean setResultCount(int count);
+
+    /**
      * 获得数据库 表单版本，
      * 客户端据此判断是否需要同步。
      * @param tableName  表单名称
@@ -25,14 +32,32 @@ public interface IDBService {
      */
     List<Object> findRecordsByLastModify(String tableName, String lastModify, int count);
 
+    List<Object> findRecordsByLastModify(String tableName, String lastModify);
+
     /**
      * 通过 sync flag 找出客户端 增加，修改过的记录
      * @param tableName  表单名称
      * @return 记录列表
      */
+    List<Object> findLocalNewRecords(String tableName, int count);
+
     List<Object> findLocalNewRecords(String tableName);
 
+    /**
+     * 通过 id 查找单条记录
+     * @param tableName the table name
+     * @param id the id
+     * @return null or the record
+     */
     Object findRecordById(String tableName, long id);
+
+    /**
+     * 通过 sql 查找记录
+     * @param tableName the table name
+     * @param sql the raw sql
+     * @return null or record list
+     */
+    List<Object> findRecords(String tableName, String sql);
 
     /**
      * 获得当前表单中 最大 id， 当 客户端 增加的 记录 id 和 服务器冲突时， 需要更新 客户端记录的id。

@@ -35,7 +35,7 @@ public class DBUnitTest {
     private static final String TABLE_NAME = MyConstant.DB_QUESTION_TABLE_NAME;
 
     private static final long RESERVED_VALID_ID = 1;
-    private static final long ID_FOR_TEST_SYNC_2_LOCAL = 2;
+    private static final long ID_FOR_TEST = 2;
 
     private static final String BODY_TEST_PATTERN = "!@#$123456";
 
@@ -92,17 +92,17 @@ public class DBUnitTest {
     @Test
     public void sync2LocalTestNoConflictedId() {
         //del the record before test to make sure no conflicted id.
-        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL)) {
-            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         }
 
         Question question = new Question(BODY_TEST_PATTERN);
-        question.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+        question.setId(ID_FOR_TEST);
 
         boolean flag = dbDao.sync2Local(TABLE_NAME, question);
         assertTrue(flag);
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         if (question != null) {
             assertEquals(BODY_TEST_PATTERN, question.getBody());
         } else {
@@ -111,22 +111,22 @@ public class DBUnitTest {
         }
 
         //del the record.
-        flag = dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        flag = dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         assertTrue(flag);
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertTrue(question == null);
     }
 
     @Test
     public void sync2LocalTestConflictedId() {
         //del the record before test to make sure no conflicted id.
-        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL)) {
-            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         }
 
         Question question = new Question(BODY_TEST_PATTERN);
-        question.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+        question.setId(ID_FOR_TEST);
 
         dbDao.sync2Local(TABLE_NAME, question);
 
@@ -136,7 +136,7 @@ public class DBUnitTest {
         //updated to the new max id.
         final String TEMP_STRING = "temp-for-test";
         Question sameIdQuestion = new Question(TEMP_STRING);
-        sameIdQuestion.setId(ID_FOR_TEST_SYNC_2_LOCAL);
+        sameIdQuestion.setId(ID_FOR_TEST);
         boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
         assertTrue(flag);
 
@@ -146,11 +146,11 @@ public class DBUnitTest {
         question = (Question) dbDao.findRecordById(TABLE_NAME, newMaxId);
         assertEquals(BODY_TEST_PATTERN, question.getBody());
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(TEMP_STRING, question.getBody());
 
         dbDao.delRecord(TABLE_NAME, newMaxId);
-        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST_SYNC_2_LOCAL);
+        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
     }
 
     @Test
@@ -163,10 +163,42 @@ public class DBUnitTest {
             assertTrue(flag);
         }
 
-        //Be careful, this will return all new records.
         List<Object> list = dbDao.findLocalNewRecords(TABLE_NAME);
         assertTrue(list != null);
         assertTrue(list.size() >= 3);
+
+        //For debug purpose.
+        Question question;
+        for (Object object : list) {
+            question = (Question) object;
+            Log.d(TAG, "findLocalNewRecordsTest: " +
+                    question.toString());
+        }
+    }
+
+    
+    @Test
+    public void findRecordsByLastModifyTest() {
+        //Clean up db by del the record before test.
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
+        }
+
+        final String expected = "test findRecordsByLastModifyTest";
+        Question question = new Question(expected);
+        question.setId(ID_FOR_TEST);
+
+        final String beginDateTime = "9999-01-01 00:00:00";
+        final String endDateTime = "9999-01-01 00:00:01";
+        question.setLastmodify(endDateTime);
+
+        boolean flag = dbDao.sync2Local(TABLE_NAME, question);
+        assertTrue(flag);
+
+        List<Object> list = dbDao.findRecordsByLastModify(TABLE_NAME, beginDateTime);
+        question = (Question) list.get(0);
+        assertTrue(question != null);
+        assertEquals(expected, question.getBody());
 
         /*//For debug purpose.
         Question question;
@@ -175,16 +207,9 @@ public class DBUnitTest {
             Log.d(TAG, "findLocalNewRecordsTest: " +
                     question.toString());
         }*/
+
+        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
     }
-
-    /*
-    @Test
-    public void findRecordsByLastModifyTest() {
-        assertTrue(false);
-    }
-
-
-    */
 
 
 
