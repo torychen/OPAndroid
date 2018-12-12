@@ -86,12 +86,12 @@ public interface IDBService {
 
     /***
      * 将一条记录（如 网页端生成的记录），插入到服务器 数据库
-     * 直接插入即可
+     * 忽略 id， 由 服务器数据库自动生成。
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 true false
      */
-    boolean insert2ServerDb(String tableName, Object record);
+    boolean insert2Server(String tableName, Object record);
 
 
     /***

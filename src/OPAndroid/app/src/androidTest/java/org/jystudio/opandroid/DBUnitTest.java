@@ -211,6 +211,24 @@ public class DBUnitTest {
         dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
     }
 
+    @Test
+    public void insert2ServerTest() {
+        //invalid id of a record will be corrected and then insert ok.
+        final String expected = "insert2ServerDbTest";
+        Question question = new Question(expected);
+        question.setId(0);//set invalid id.
+
+        boolean flag = dbDao.insert2Server(TABLE_NAME, question);
+        assertTrue(flag);
+
+        long maxId = dbDao.getMaxId(TABLE_NAME);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, maxId);
+        assertEquals(expected, question.getBody());
+
+        //For debug purpose
+        Log.d(TAG, "insert2ServerTest: " + question.toString());
+    }
+
 
 
 

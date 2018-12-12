@@ -155,21 +155,21 @@ public class Question {
 
     public Question(String body) {
        id         = 0;
-       title      = "title最新面试题"  ;
+       title      = "最新面试题"  ;
        this.body  = body  ;
-       answer     = "answer我不知道"  ;
-       submitter  = "submitter小明"  ;
-       modifier   = "modifier 笑笑"  ;
+       answer     = "我不知道"  ;
+       submitter  = "小明"  ;
+       modifier   = "笑笑"  ;
        lastmodify = MyConstant.MY_D_DAY_DATETIME  ;
        language   = "common"  ;
-       category   = "category na"  ;
-       company    = "company 你懂的"  ;
-       rate       = "rate 1"  ;
-       imgpath    = "imgpath na"  ;
-       heat       = "heat 1"  ;
-       syncflag   = "syncflag" + Integer.toString(MyConstant.SYNC_FLAG_LOCAL_ADD)  ;
-       blame      = "blame 0"  ;
-       duplicate  = "duplicate 0"  ;
+       category   = "na"  ;
+       company    = "不可说"  ;
+       rate       = "1"  ;
+       imgpath    = "na"  ;
+       heat       = "1"  ;
+       syncflag   = Integer.toString(MyConstant.SYNC_FLAG_LOCAL_ADD)  ;
+       blame      = "0"  ;
+       duplicate  = "0"  ;
     }
 
     @Override

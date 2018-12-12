@@ -315,13 +315,6 @@ public class MyDbDao implements IDBService {
 
 
     @Override
-    public boolean insert2ServerDb(String tableName, Object record){
-        return false;
-    }
-
-
-
-    @Override
     public boolean sync2Local(String tableName, Object record) {
         boolean flag;
         Question question = (Question) record;
@@ -440,13 +433,9 @@ public class MyDbDao implements IDBService {
         return flag;
     }
 
-    /**
-     * insert exactly the input record except the 'id' field.
-     * @param tableName the table name
-     * @param question the record
-     * @return true or false
-     */
-    private boolean insertRecordAutoId(String tableName, Question question) {
+    @Override
+    public boolean insert2Server(String tableName, Object record){
+        Question question = (Question) record;
         boolean flag = false;
         try {
             database = dbHelper.getWritableDatabase();
@@ -493,8 +482,6 @@ public class MyDbDao implements IDBService {
                     question.getBlame(),
                     question.getDuplicate()
             };
-
-            //why only show part of strings? Log.d(TAG, "insert2Local: the values is" + strings.toString());
 
             database.execSQL(sql, strings);
 
