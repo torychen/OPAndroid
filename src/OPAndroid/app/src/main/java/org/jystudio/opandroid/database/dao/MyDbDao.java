@@ -386,17 +386,37 @@ public class MyDbDao implements IDBService {
         question.setLastmodify(lastmodify);
 
         Map<String, Object> map = null;
-        boolean flag = insert2Server(tableName, question);
-        if (flag) {
-            Long maxId = getMaxId(tableName);
-            if (maxId > 0) {
+
+        int syncflag = Integer.parseInt(question.getSyncflag());
+        if (SYNC_FLAG_LOCAL_ADD == syncflag) {
+            question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
+            //Directly insert it.
+            boolean flag = insert2Server(tableName, question);
+            if (flag) {
+                Long maxId = getMaxId(tableName);
+                if (maxId > 0) {
+                    map = new HashMap<>();
+                    map.put(DB_QUESTION_TABLE_ID, maxId);
+                    map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
+
+                    Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
+                    Log.d(TAG, "sync2Server: id is " + maxId);
+                }
+            }
+        } else if (SYNC_FLAG_LOCAL_MODIFY == syncflag) {
+            question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_MODIFY));
+            boolean flag = updateRecord(tableName, question);
+            if (flag) {
                 map = new HashMap<>();
-                map.put(DB_QUESTION_TABLE_ID, maxId);
+                map.put(DB_QUESTION_TABLE_ID, question.getId());
                 map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
 
                 Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
-                Log.d(TAG, "sync2Server: id is " + maxId);
+                Log.d(TAG, "sync2Server: id is " + question.getId());
             }
+
+        } else {
+            Log.e(TAG, "sync2Server: error not support syncflag", null);
         }
 
         return map;
