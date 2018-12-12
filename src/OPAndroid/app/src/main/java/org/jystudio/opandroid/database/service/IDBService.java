@@ -82,11 +82,11 @@ public interface IDBService {
      * @return 返回 插入后的 id 和 lastModify。 本地记录 更新到 服务器后， id 和 lastModify 以服务器返回的为准。
      *  返回空，则表明插入失败
      */
-    Map<String, Object> sync2ServerDb(String tableName, Object record);
+    Map<String, Object> sync2Server(String tableName, Object record);
 
     /***
      * 将一条记录（如 网页端生成的记录），插入到服务器 数据库
-     * 忽略 id， 由 服务器数据库自动生成。
+     * id， 由 服务器数据库自动生成。
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 true false
@@ -95,7 +95,7 @@ public interface IDBService {
 
 
     /***
-     * 将一条服务器端增加/修改的记录，同步到 本地 数据库
+     * 将一条服务器端 增加/修改 的记录，同步到 本地 数据库
      * 如果 id 有冲突，说明本地数据库的记录占用了 当前 id。
      * 把 本地数据库记录的 id 变更。
      * @param tableName  表单名称
@@ -128,6 +128,14 @@ public interface IDBService {
      * @return true or false
      */
     boolean delRecord(String tableName, long id);
+
+    /**
+     * update a record.
+     * @param tableName table name
+     * @param record the record
+     * @return true or false
+     */
+    boolean updateRecord(String tableName, Object record);
 
 
 }

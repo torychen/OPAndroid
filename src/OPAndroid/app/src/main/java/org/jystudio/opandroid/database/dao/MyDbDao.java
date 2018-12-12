@@ -11,7 +11,9 @@ import org.jystudio.opandroid.database.service.IDBService;
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -276,6 +278,73 @@ public class MyDbDao implements IDBService {
 
 
     @Override
+    public boolean updateRecord(String tableName, Object record) {
+        Question question = (Question) record;
+        long orgId = question.getId();
+        if (orgId <= 0) {
+            return false;
+        }
+
+        boolean flag = false;
+        try {
+            database = dbHelper.getWritableDatabase();
+            StringBuilder sqlBuilder = new StringBuilder("update  ");
+            sqlBuilder.append(tableName + " set ");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_TITLE + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_BODY + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_ANSWER + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_SUBMITTER + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_MODIFIER + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_LASTMODIFY + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_LANGUAGE + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_CATEGORY + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_COMPANY + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_RATE + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_IMGPATH + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_HEAT + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_SYNCFLAG + "=?,");
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_BLAME + "=?,");
+            //last field
+            sqlBuilder.append(MyConstant.DB_QUESTION_TABLE_DUPLICATE + "=?" );
+
+            sqlBuilder.append(" where id=" + Long.toString(orgId));
+
+            String sql = sqlBuilder.toString();
+
+            //OK Log.d(TAG, "updateRecord: the sql is: " + sql);
+
+            String [] strings = new String[] {
+                    question.getTitle(),
+                    question.getBody(),
+                    question.getAnswer(),
+                    question.getSubmitter(),
+                    question.getModifier(),
+                    question.getLastmodify(),
+                    question.getLanguage(),
+                    question.getCategory(),
+                    question.getCompany(),
+                    question.getRate(),
+                    question.getImgpath(),
+                    question.getHeat(),
+                    question.getSyncflag(),
+                    question.getBlame(),
+                    question.getDuplicate()
+            };
+
+            database.execSQL(sql, strings);
+
+            flag = true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDb();
+        }
+
+        return flag;
+    }
+
+    @Override
     public  boolean updateIdToNewMax(String tableName, long orgId) {
         if (orgId <= 0) {
             return false;
@@ -308,9 +377,29 @@ public class MyDbDao implements IDBService {
     }
 
 
+    //TODO need to handle both insert and modify scenario.
     @Override
-    public Map<String, Object> sync2ServerDb(String tableName, Object record) {
-        return null;
+    public Map<String, Object> sync2Server(String tableName, Object record) {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        String lastmodify = timestamp.toString();
+        Question question = (Question) record;
+        question.setLastmodify(lastmodify);
+
+        Map<String, Object> map = null;
+        boolean flag = insert2Server(tableName, question);
+        if (flag) {
+            Long maxId = getMaxId(tableName);
+            if (maxId > 0) {
+                map = new HashMap<>();
+                map.put(DB_QUESTION_TABLE_ID, maxId);
+                map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
+
+                Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
+                Log.d(TAG, "sync2Server: id is " + maxId);
+            }
+        }
+
+        return map;
     }
 
 
@@ -319,15 +408,26 @@ public class MyDbDao implements IDBService {
         boolean flag;
         Question question = (Question) record;
         long orgId = question.getId();
-        if (isConflictId(tableName, orgId)) {
-            flag = updateIdToNewMax(tableName, orgId);
-
-            if (!flag) {
-                Log.e(TAG, "sync2Local: updateIdToNewMax() failed!", null);
-                return false;
+        Question orgRecord = (Question) findRecordById(tableName, orgId);
+        if (orgRecord != null) {
+            //if the org record is inserted / modify by local,
+            //update its id to new max then insert the new record.
+            int syncflag =  Integer.parseInt(orgRecord.getSyncflag());
+            if (syncflag >= SYNC_FLAG_LOCAL_ADD ) {
+                flag = updateIdToNewMax(tableName, orgId);
+                if (!flag) {
+                    Log.e(TAG, "sync2Local: updateIdToNewMax() failed!", null);
+                    return false;
+                }
+            } else {
+                //The org record is inserted / modified by server,
+                //update it accordingly.
+                flag = updateRecord(tableName, question);
+                return flag;
             }
         }
 
+        //Insert directly since local db no such record.
         flag = insertRecord(tableName, question);
 
         return flag;

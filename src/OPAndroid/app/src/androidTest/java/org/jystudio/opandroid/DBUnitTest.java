@@ -13,10 +13,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
 import org.jystudio.opandroid.database.service.DatabaseTableVersion;
+
+import static org.junit.Assert.assertFalse;
+import static  org.jystudio.opandroid.database.service.MyConstant.*;
+
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -90,7 +95,7 @@ public class DBUnitTest {
     }
 
     @Test
-    public void sync2LocalTestNoConflictedId() {
+    public void sync2LocalTestNoConflictedIdInsert() {
         //del the record before test to make sure no conflicted id.
         if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
             dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
@@ -103,12 +108,8 @@ public class DBUnitTest {
         assertTrue(flag);
 
         question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
-        if (question != null) {
-            assertEquals(BODY_TEST_PATTERN, question.getBody());
-        } else {
-            //Something wrong.
-            assertTrue(false);
-        }
+        assertTrue(question != null);
+        assertEquals(BODY_TEST_PATTERN, question.getBody());
 
         //del the record.
         flag = dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
@@ -119,7 +120,7 @@ public class DBUnitTest {
     }
 
     @Test
-    public void sync2LocalTestConflictedId() {
+    public void sync2LocalTestConflictedIdInsert() {
         //del the record before test to make sure no conflicted id.
         if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
             dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
@@ -150,6 +151,42 @@ public class DBUnitTest {
         assertEquals(TEMP_STRING, question.getBody());
 
         dbDao.delRecord(TABLE_NAME, newMaxId);
+        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
+    }
+
+    @Test
+    public void sync2LocalTestConflictedIdUpdate() {
+        //del the record before test to make sure no conflicted id.
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
+        }
+
+        Question question = new Question(BODY_TEST_PATTERN);
+        question.setId(ID_FOR_TEST);
+
+        //This record should be updated via the new record.
+        question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
+
+        dbDao.sync2Local(TABLE_NAME, question);
+
+        long recordCount = dbDao.getRecordCount(TABLE_NAME);
+
+        //Try to insert the same id record with different body. the previous id record should be
+        //updated the body. No new record is created.
+        final String TEMP_STRING = "temp-for-test";
+        Question sameIdQuestion = new Question(TEMP_STRING);
+        sameIdQuestion.setId(ID_FOR_TEST);
+        boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
+        assertTrue(flag);
+
+        //No new record.
+        long newCount = dbDao.getRecordCount(TABLE_NAME);
+        assertEquals(recordCount, newCount);
+
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
+        assertEquals(TEMP_STRING, question.getBody());
+
         dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
     }
 
@@ -229,15 +266,62 @@ public class DBUnitTest {
         Log.d(TAG, "insert2ServerTest: " + question.toString());
     }
 
+    @Test
+    public void sync2ServerTest(){
+        //Verify that id, lastdodify and syncflag of a record should be changed after insert to server.
+        String expected = "sync2ServerTest";
+        Question question = new Question(expected);
+        Long orgId = question.getId();
+        String orgLastmodify = question.getLastmodify();
+        question.setSyncflag(Integer.toString(SYNC_FLAG_LOCAL_ADD));
+
+        Map<String, Object> map = dbDao.sync2Server(TABLE_NAME, question);
+        assertTrue(map != null);
+
+        Long newId =  (long) map.get(DB_QUESTION_TABLE_ID);
+        String newLastModify = (String ) map.get(DB_QUESTION_TABLE_LASTMODIFY);
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, newId);
+        assertEquals(expected, question.getBody());
+        assertEquals(newLastModify, question.getLastmodify());
+
+        assertTrue(orgId != question.getId());
+        assertTrue(!orgLastmodify.equals(question.getLastmodify()));
+        int syncflag = Integer.parseInt(question.getSyncflag());
+
+        assertEquals(SYNC_FLAG_SERVER_ADD, syncflag);
+
+    }
+
+    @Test
+    public  void  updateRecordTest() {
+        //Clean up db by del the record before test.
+        if (dbDao.isConflictId(TABLE_NAME, ID_FOR_TEST)) {
+            dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
+        }
+
+        String expected = "updateRecordTest expected";
+        String toBeUpdated = "updateRecordTest toBeUpdated";
+        Question question = new Question(toBeUpdated);
+        question.setId(ID_FOR_TEST);
+        question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
+
+        dbDao.sync2Local(TABLE_NAME, question);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
+        assertEquals(toBeUpdated, question.getBody());
+
+        question.setBody(expected);
+        boolean flag = dbDao.updateRecord(TABLE_NAME, question);
+        assertTrue(flag);
+
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
+        assertEquals(expected, question.getBody());
 
 
+        //clean up db.
+        dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
 
-
-
-
-
-
-
+    }
 
 
 
