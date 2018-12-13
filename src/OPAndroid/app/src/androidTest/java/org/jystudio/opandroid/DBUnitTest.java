@@ -127,19 +127,18 @@ public class DBUnitTest {
             dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         }
 
+        //Local add one record first.
         Question question = new Question(BODY_TEST_PATTERN);
-        question.setId(ID_FOR_TEST);
-        question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
-
-        dbDao.sync2Local(TABLE_NAME, question);
+        question.setSyncflag(Integer.toString(SYNC_FLAG_LOCAL_ADD));
+        dbDao.insert2Local(TABLE_NAME, question);
 
         long maxId = dbDao.getMaxId(TABLE_NAME);
 
         //Try to insert the same id record with different body. the previous id record should be
         //updated to the new max id.
-        final String TEMP_STRING = "temp-for-test";
+        final String TEMP_STRING = "temp-for-test-server-add";
         Question sameIdQuestion = new Question(TEMP_STRING);
-        sameIdQuestion.setId(ID_FOR_TEST);
+        sameIdQuestion.setId(maxId);
         sameIdQuestion.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
         boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
         assertTrue(flag);
@@ -150,8 +149,9 @@ public class DBUnitTest {
         question = (Question) dbDao.findRecordById(TABLE_NAME, newMaxId);
         assertEquals(BODY_TEST_PATTERN, question.getBody());
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, maxId);
         assertEquals(TEMP_STRING, question.getBody());
+        assertEquals(SYNC_FLAG_SERVER_ADD, Integer.parseInt(question.getSyncflag()));
 
         dbDao.delRecord(TABLE_NAME, newMaxId);
         dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
@@ -164,11 +164,9 @@ public class DBUnitTest {
             dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         }
 
+        //This record should be updated via the new record.
         Question question = new Question(BODY_TEST_PATTERN);
         question.setId(ID_FOR_TEST);
-        question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
-
-        //This record should be updated via the new record.
         question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
 
         dbDao.sync2Local(TABLE_NAME, question);
@@ -307,7 +305,7 @@ public class DBUnitTest {
             dbDao.delRecord(TABLE_NAME, ID_FOR_TEST);
         }
 
-        String expected = "sync2ServerTestLocalModify";
+        String expected = "sync2ServerTestLocalModify expected";
         String toBeUpdated = "sync2ServerTestLocalModify toBeUpdated";
         Question question = new Question(toBeUpdated);
         question.setId(ID_FOR_TEST);
@@ -315,10 +313,9 @@ public class DBUnitTest {
         String orgLastmodify = question.getLastmodify();
         dbDao.insert2Server(TABLE_NAME, question);
 
-        //Verify that id should not be changed,
+        //Verify that id should NOT be changed,
         // lastdodify and syncflag of a record should be changed after sync2server.
-        question = new Question(expected);
-        question.setId(ID_FOR_TEST);
+        question.setBody(expected);
         question.setSyncflag(Integer.toString(SYNC_FLAG_LOCAL_MODIFY));
 
         Map<String, Object> map = dbDao.sync2Server(TABLE_NAME, question);
@@ -327,14 +324,16 @@ public class DBUnitTest {
         Long newId =  (long) map.get(DB_QUESTION_TABLE_ID);
         String newLastModify = (String ) map.get(DB_QUESTION_TABLE_LASTMODIFY);
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, newId);
-        assertEquals(expected, question.getBody());
-        assertEquals(newLastModify, question.getLastmodify());
+        Question question2 = (Question) dbDao.findRecordById(TABLE_NAME, newId);
+        Log.d(TAG, "sync2ServerTestLocalModify: getBody" + question2.getBody());
 
-        assertTrue(ID_FOR_TEST == question.getId());
+        assertTrue(ID_FOR_TEST == newId);
+        assertEquals(expected, question2.getBody());
+        assertEquals(newLastModify, question2.getLastmodify());
 
-        assertTrue(!orgLastmodify.equals(question.getLastmodify()));
-        int syncflag = Integer.parseInt(question.getSyncflag());
+
+        assertTrue(!orgLastmodify.equals(question2.getLastmodify()));
+        int syncflag = Integer.parseInt(question2.getSyncflag());
 
         assertEquals(SYNC_FLAG_SERVER_MODIFY, syncflag);
 
@@ -357,6 +356,7 @@ public class DBUnitTest {
         dbDao.sync2Local(TABLE_NAME, question);
         question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(toBeUpdated, question.getBody());
+        Log.d(TAG, "updateRecordTest: " + question.getBody());
 
         question.setBody(expected);
         boolean flag = dbDao.updateRecord(TABLE_NAME, question);
@@ -364,6 +364,7 @@ public class DBUnitTest {
 
         question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(expected, question.getBody());
+        Log.d(TAG, "updateRecordTest: " + question.getBody());
 
 
         //clean up db.

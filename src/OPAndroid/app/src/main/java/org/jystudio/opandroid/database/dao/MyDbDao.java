@@ -424,8 +424,8 @@ public class MyDbDao implements IDBService {
                 map.put(DB_QUESTION_TABLE_ID, question.getId());
                 map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
 
-                Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
-                Log.d(TAG, "sync2Server: id is " + question.getId());
+                Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY lastmodify is " + lastmodify);
+                Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY id is " + question.getId());
             }
 
         } else {
@@ -439,7 +439,7 @@ public class MyDbDao implements IDBService {
     @Override
     public boolean sync2Local(String tableName, Object record) {
         boolean flag = false;
-        Question question = (Question) record;
+        final Question question = (Question) record;
 
         //The new input record should be server add or server modify.
         int syncflag = Integer.parseInt(question.getSyncflag());
@@ -447,9 +447,13 @@ public class MyDbDao implements IDBService {
             return false;
         }
 
+        Log.d(TAG, "sync2Local: syncflag is " + question.getSyncflag());
+
         long orgId = question.getId();
         Question orgRecord = (Question) findRecordById(tableName, orgId);
         if (orgRecord != null) {
+            Log.d(TAG, "sync2Local: org record is not null");
+
             //if the org record is inserted / modify by local,
             //update its id to new max then insert the new record.
             syncflag =  Integer.parseInt(orgRecord.getSyncflag());
@@ -462,10 +466,14 @@ public class MyDbDao implements IDBService {
             } else {
                 //The org record is inserted / modified by server,
                 //update it accordingly.
+
+                Log.d(TAG, "sync2Local: try to update");
+
                 flag = updateRecord(tableName, question);
                 if (!flag) {
                     Log.e(TAG, "sync2Local: updateRecord() fail.", null);
                 }
+                Log.d(TAG, "sync2Local: updateRecord " + flag);
                 return flag;
             }
         }
