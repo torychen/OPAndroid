@@ -165,7 +165,7 @@ TODO SQLite 数据类型 和 MySQL的交集。 是否支持 datetime， int 范�
 
 
 + 服务器端增加数据
-    服务器忽略客户端提交记录的 id 值，按照当前timestamp， 增加一条记录，
+    服务器忽略客户端提交记录的 id 值，按照当前timestamp， 增加一条记录， 同时把 sync flag 改为 sever add
     返回给客户端 新的 id值 和 lastmodify。 客户端更新对应记录的id 和 sync flag 和 lastmodify
 
 + 服务器端修改数据

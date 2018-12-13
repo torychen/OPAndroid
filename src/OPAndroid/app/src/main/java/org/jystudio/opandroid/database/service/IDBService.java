@@ -76,7 +76,7 @@ public interface IDBService {
      boolean updateIdToNewMax(String tableName, long orgId);
 
     /***
-     * 将一条客户端增加/修改的记录，同步到服务器 数据库
+     * 将一条客户端 增加/修改 的记录，同步到服务器 数据库
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 插入后的 id 和 lastModify。 本地记录 更新到 服务器后， id 和 lastModify 以服务器返回的为准。
@@ -130,7 +130,7 @@ public interface IDBService {
     boolean delRecord(String tableName, long id);
 
     /**
-     * update a record.
+     * update a record each field except the 'id'.
      * @param tableName table name
      * @param record the record
      * @return true or false

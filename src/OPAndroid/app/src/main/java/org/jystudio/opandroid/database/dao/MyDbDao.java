@@ -377,20 +377,30 @@ public class MyDbDao implements IDBService {
     }
 
 
-    //TODO need to handle both insert and modify scenario.
     @Override
     public Map<String, Object> sync2Server(String tableName, Object record) {
+        Question question = (Question) record;
+
+        //The new input record should be local add or local modify
+        int syncflag = Integer.parseInt(question.getSyncflag());
+        if (syncflag < SYNC_FLAG_LOCAL_ADD) {
+            return null;
+        }
+
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String lastmodify = timestamp.toString();
-        Question question = (Question) record;
         question.setLastmodify(lastmodify);
+        Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
 
         Map<String, Object> map = null;
 
-        int syncflag = Integer.parseInt(question.getSyncflag());
+        //Handle local add, local modify separately.
         if (SYNC_FLAG_LOCAL_ADD == syncflag) {
             question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
-            //Directly insert it.
+            //Directly insert it,
+            // id will be automatically corrected.
+            // lastmodify should be updated to current.
+            // syncflag should be updated SYNC_FLAG_SERVER_ADD.
             boolean flag = insert2Server(tableName, question);
             if (flag) {
                 Long maxId = getMaxId(tableName);
@@ -404,6 +414,9 @@ public class MyDbDao implements IDBService {
                 }
             }
         } else if (SYNC_FLAG_LOCAL_MODIFY == syncflag) {
+            //id no change
+            // lastmodify should be updated to current.
+            // syncflag should be updated SYNC_FLAG_SERVER_MODIFY.
             question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_MODIFY));
             boolean flag = updateRecord(tableName, question);
             if (flag) {
@@ -425,14 +438,21 @@ public class MyDbDao implements IDBService {
 
     @Override
     public boolean sync2Local(String tableName, Object record) {
-        boolean flag;
+        boolean flag = false;
         Question question = (Question) record;
+
+        //The new input record should be server add or server modify.
+        int syncflag = Integer.parseInt(question.getSyncflag());
+        if (syncflag > SYNC_FLAG_SERVER_MODIFY) {
+            return false;
+        }
+
         long orgId = question.getId();
         Question orgRecord = (Question) findRecordById(tableName, orgId);
         if (orgRecord != null) {
             //if the org record is inserted / modify by local,
             //update its id to new max then insert the new record.
-            int syncflag =  Integer.parseInt(orgRecord.getSyncflag());
+            syncflag =  Integer.parseInt(orgRecord.getSyncflag());
             if (syncflag >= SYNC_FLAG_LOCAL_ADD ) {
                 flag = updateIdToNewMax(tableName, orgId);
                 if (!flag) {
@@ -443,6 +463,9 @@ public class MyDbDao implements IDBService {
                 //The org record is inserted / modified by server,
                 //update it accordingly.
                 flag = updateRecord(tableName, question);
+                if (!flag) {
+                    Log.e(TAG, "sync2Local: updateRecord() fail.", null);
+                }
                 return flag;
             }
         }
@@ -459,6 +482,11 @@ public class MyDbDao implements IDBService {
         boolean flag;
 
         Question question = (Question) record;
+        //The new input record should be local add.
+        int syncflag = Integer.parseInt(question.getSyncflag());
+        if (syncflag != SYNC_FLAG_LOCAL_ADD) {
+            return false;
+        }
 
         //To avoid conflicts of the server created records,
         //update 'id' and 'lastmodify' of a record which is client create and try to insert to local database.
@@ -556,6 +584,13 @@ public class MyDbDao implements IDBService {
     @Override
     public boolean insert2Server(String tableName, Object record){
         Question question = (Question) record;
+
+        //The new input record should be server add.
+        int syncflag = Integer.parseInt(question.getSyncflag());
+        if (syncflag != SYNC_FLAG_SERVER_ADD) {
+            return false;
+        }
+
         boolean flag = false;
         try {
             database = dbHelper.getWritableDatabase();
