@@ -44,6 +44,6 @@ public class MyDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO need implementation.
+        //TODO onUpgrade() need implementation.
     }
 }

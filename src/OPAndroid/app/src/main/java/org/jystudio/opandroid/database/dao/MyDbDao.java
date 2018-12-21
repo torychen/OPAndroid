@@ -17,7 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jystudio.opandroid.database.service.MyConstant.*;
+import static org.jystudio.opandroid.database.service.MyConstant.DB_QUESTION_TABLE_ID;
+import static org.jystudio.opandroid.database.service.MyConstant.DB_QUESTION_TABLE_LASTMODIFY;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_LOCAL_ADD;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_LOCAL_MODIFY;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_SERVER_ADD;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_SERVER_MODIFY;
 
 public class MyDbDao implements IDBService {
     private static final String TAG = "MyDbDao -->>";
@@ -44,7 +49,7 @@ public class MyDbDao implements IDBService {
     }
 
     @Override
-    public boolean setResultCount(int count) {
+    public boolean setQueryResultCount(int count) {
         boolean flag = false;
         if (validateCount(count)) {
             flag = true;
@@ -361,11 +366,11 @@ public class MyDbDao implements IDBService {
             database = dbHelper.getWritableDatabase();
 
             String sql = "update " + tableName + " set id=" + Long.toString(maxId) + " where id=" + Long.toString(orgId);
-            Log.d(TAG, "updateIdToNewMax: the sql is " + sql);
+            //Log.d(TAG, "updateIdToNewMax: the sql is " + sql);
 
             database.execSQL(sql);
             flag = true;
-            Log.d(TAG, "updateIdToNewMax: orgId is" + Long.toString(orgId) + "new id is " + Long.toString(maxId) );
+            //Log.d(TAG, "updateIdToNewMax: orgId is " + Long.toString(orgId) + " new id is " + Long.toString(maxId) );
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -390,7 +395,7 @@ public class MyDbDao implements IDBService {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String lastmodify = timestamp.toString();
         question.setLastmodify(lastmodify);
-        Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
+        //Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
 
         Map<String, Object> map = null;
 
@@ -409,8 +414,8 @@ public class MyDbDao implements IDBService {
                     map.put(DB_QUESTION_TABLE_ID, maxId);
                     map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
 
-                    Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
-                    Log.d(TAG, "sync2Server: id is " + maxId);
+                    //Log.d(TAG, "sync2Server: lastmodify is " + lastmodify);
+                    //Log.d(TAG, "sync2Server: id is " + maxId);
                 }
             }
         } else if (SYNC_FLAG_LOCAL_MODIFY == syncflag) {
@@ -424,8 +429,8 @@ public class MyDbDao implements IDBService {
                 map.put(DB_QUESTION_TABLE_ID, question.getId());
                 map.put(DB_QUESTION_TABLE_LASTMODIFY, lastmodify);
 
-                Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY lastmodify is " + lastmodify);
-                Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY id is " + question.getId());
+                //Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY lastmodify is " + lastmodify);
+                //Log.d(TAG, "sync2Server: SYNC_FLAG_LOCAL_MODIFY id is " + question.getId());
             }
 
         } else {
@@ -438,7 +443,7 @@ public class MyDbDao implements IDBService {
 
     @Override
     public boolean sync2Local(String tableName, Object record) {
-        boolean flag = false;
+        boolean flag;
         final Question question = (Question) record;
 
         //The new input record should be server add or server modify.
@@ -447,12 +452,12 @@ public class MyDbDao implements IDBService {
             return false;
         }
 
-        Log.d(TAG, "sync2Local: syncflag is " + question.getSyncflag());
+        //Log.d(TAG, "sync2Local: syncflag is " + syncflag);
 
         long orgId = question.getId();
         Question orgRecord = (Question) findRecordById(tableName, orgId);
         if (orgRecord != null) {
-            Log.d(TAG, "sync2Local: org record is not null");
+            //Log.d(TAG, "sync2Local: org record is not null");
 
             //if the org record is inserted / modify by local,
             //update its id to new max then insert the new record.
@@ -467,13 +472,13 @@ public class MyDbDao implements IDBService {
                 //The org record is inserted / modified by server,
                 //update it accordingly.
 
-                Log.d(TAG, "sync2Local: try to update");
+                //Log.d(TAG, "sync2Local: try to update");
 
                 flag = updateRecord(tableName, question);
                 if (!flag) {
                     Log.e(TAG, "sync2Local: updateRecord() fail.", null);
                 }
-                Log.d(TAG, "sync2Local: updateRecord " + flag);
+                //Log.d(TAG, "sync2Local: updateRecord " + flag);
                 return flag;
             }
         }
@@ -501,7 +506,7 @@ public class MyDbDao implements IDBService {
         question.setLastmodify(MyConstant.MY_D_DAY_DATETIME);
 
         long id = getMaxId(tableName);
-        Log.d(TAG, "insert2Local: max id is " + Long.toString(id) + "\n");
+        //Log.d(TAG, "insert2Local: max id is " + Long.toString(id) + "\n");
 
         //This is the first local record to be inserted, use the special id instead.
         if(id < MyConstant.ID_BEGINNING_FOR_CLIENT_INSERT) {
@@ -512,20 +517,15 @@ public class MyDbDao implements IDBService {
             question.setId(id);
         }
 
-        Log.d(TAG, "insert2Local: question id is" + question.getId() + "\n");
+        //Log.d(TAG, "insert2Local: question id is" + question.getId() + "\n");
 
         flag = insertRecord(tableName, question);
 
         return flag;
     }
 
-    /**
-     * insert a record exactly the same as the input.
-     * @param tableName the table name
-     * @param question  the record.
-     * @return true or false
-     */
-    private boolean insertRecord(String tableName, Question question) {
+    @Override
+    public boolean insertRecord(String tableName, Question question) {
         boolean flag = false;
         try {
             database = dbHelper.getWritableDatabase();

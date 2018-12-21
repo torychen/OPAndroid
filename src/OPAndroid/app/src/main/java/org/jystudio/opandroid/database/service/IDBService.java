@@ -10,7 +10,7 @@ public interface IDBService {
      * @param count 数量
      * @return true or false
      */
-    boolean setResultCount(int count);
+    boolean setQueryResultCount(int count);
 
     /**
      * 获得数据库 表单版本，
@@ -76,17 +76,28 @@ public interface IDBService {
      boolean updateIdToNewMax(String tableName, long orgId);
 
     /***
+     * sync2Server
+     *
      * 将一条客户端 增加/修改 的记录，同步到服务器 数据库
+     * 增加：
+     * 插入一条新的记录到数据库。返回 id 和 lastmodify
+     *
+     * 修改：
+     * 按照 id， 更新原有记录， 返回 id 和 lastmodify
+     *
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 插入后的 id 和 lastModify。 本地记录 更新到 服务器后， id 和 lastModify 以服务器返回的为准。
-     *  返回空，则表明插入失败
+     *  返回空，则表明操作失败
      */
     Map<String, Object> sync2Server(String tableName, Object record);
 
     /***
+     * insert2Server
+     *
      * 将一条记录（如 网页端生成的记录），插入到服务器 数据库
-     * id， 由 服务器数据库自动生成。
+     * id， 由 服务器数据库自动生成。其它字段的内容不变。
+     *
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 true false
@@ -95,9 +106,13 @@ public interface IDBService {
 
 
     /***
+     * sync2Local
+     *
      * 将一条服务器端 增加/修改 的记录，同步到 本地 数据库
      * 如果 id 有冲突，说明本地数据库的记录占用了 当前 id。
-     * 把 本地数据库记录的 id 变更。
+     * 把 本地数据库记录的 id 变更为新的最大 id。
+     *
+     *
      * @param tableName  表单名称
      * @param record 一条记录
      * @return 返回 true false
@@ -136,6 +151,15 @@ public interface IDBService {
      * @return true or false
      */
     boolean updateRecord(String tableName, Object record);
+
+
+    /**
+     * insert a record directly.
+     * @param tableName the table name
+     * @param question  the record.
+     * @return true or false
+     */
+    boolean insertRecord(String tableName, Question question);
 
 
 }

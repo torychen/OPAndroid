@@ -13,10 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jystudio.opandroid.database.dao.MyDbDao;
 import org.jystudio.opandroid.database.service.DatabaseTableVersion;
-
-import static org.junit.Assert.assertFalse;
-import static  org.jystudio.opandroid.database.service.MyConstant.*;
-
 import org.jystudio.opandroid.database.service.MyConstant;
 import org.jystudio.opandroid.database.service.Question;
 
@@ -25,6 +21,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.jystudio.opandroid.database.service.MyConstant.DB_QUESTION_TABLE_ID;
+import static org.jystudio.opandroid.database.service.MyConstant.DB_QUESTION_TABLE_LASTMODIFY;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_LOCAL_ADD;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_LOCAL_MODIFY;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_SERVER_ADD;
+import static org.jystudio.opandroid.database.service.MyConstant.SYNC_FLAG_SERVER_MODIFY;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -46,6 +48,8 @@ public class DBUnitTest {
 
 
 
+
+
     @BeforeClass
     public static void setUp() {
         context = InstrumentationRegistry.getTargetContext();
@@ -58,6 +62,26 @@ public class DBUnitTest {
         context = null;
     }
 
+
+
+
+    //UT pass
+    @Ignore
+    public void emptyDbTest() {
+        long id;
+        emptyDb();
+
+        long count = dbDao.getRecordCount(TABLE_NAME);
+        assertTrue(count == 0);
+    }
+
+    private void emptyDb() {
+        long id;
+        while ((id = dbDao.getMaxId(TABLE_NAME)) != 0) {
+            dbDao.delRecord(TABLE_NAME, id);
+            //Log.d(TAG, "emptyDbTest: id " + id);
+        }
+    }
 
     //UT pass
     @Ignore
@@ -80,7 +104,7 @@ public class DBUnitTest {
         assertTrue(tableVersion.getRecordsNum() > 0);
     }
 
-    @Test
+    @Ignore
     public  void isConflictIdTest() {
         long invalidId = 0;
         assertTrue(dbDao.isConflictId(TABLE_NAME, invalidId));
@@ -129,8 +153,9 @@ public class DBUnitTest {
 
         //Local add one record first.
         Question question = new Question(BODY_TEST_PATTERN);
+        question.setId(ID_FOR_TEST);
         question.setSyncflag(Integer.toString(SYNC_FLAG_LOCAL_ADD));
-        dbDao.insert2Local(TABLE_NAME, question);
+        dbDao.insertRecord(TABLE_NAME, question);
 
         long maxId = dbDao.getMaxId(TABLE_NAME);
 
@@ -138,7 +163,7 @@ public class DBUnitTest {
         //updated to the new max id.
         final String TEMP_STRING = "temp-for-test-server-add";
         Question sameIdQuestion = new Question(TEMP_STRING);
-        sameIdQuestion.setId(maxId);
+        sameIdQuestion.setId(ID_FOR_TEST);
         sameIdQuestion.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
         boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
         assertTrue(flag);
@@ -149,7 +174,7 @@ public class DBUnitTest {
         question = (Question) dbDao.findRecordById(TABLE_NAME, newMaxId);
         assertEquals(BODY_TEST_PATTERN, question.getBody());
 
-        question = (Question) dbDao.findRecordById(TABLE_NAME, maxId);
+        question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(TEMP_STRING, question.getBody());
         assertEquals(SYNC_FLAG_SERVER_ADD, Integer.parseInt(question.getSyncflag()));
 
@@ -169,7 +194,7 @@ public class DBUnitTest {
         question.setId(ID_FOR_TEST);
         question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
 
-        dbDao.sync2Local(TABLE_NAME, question);
+        dbDao.insertRecord(TABLE_NAME, question);
 
         long recordCount = dbDao.getRecordCount(TABLE_NAME);
 
@@ -178,13 +203,14 @@ public class DBUnitTest {
         final String TEMP_STRING = "temp-for-test";
         Question sameIdQuestion = new Question(TEMP_STRING);
         sameIdQuestion.setId(ID_FOR_TEST);
-        question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_MODIFY));
+        sameIdQuestion.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_MODIFY));
         boolean flag = dbDao.sync2Local(TABLE_NAME, sameIdQuestion);
         assertTrue(flag);
 
         //No new record.
         long newCount = dbDao.getRecordCount(TABLE_NAME);
         assertEquals(recordCount, newCount);
+        Log.d(TAG, "sync2LocalTestConflictedIdUpdate: count is " + newCount);
 
         question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(TEMP_STRING, question.getBody());
@@ -263,12 +289,16 @@ public class DBUnitTest {
         assertTrue(flag);
 
         long maxId = dbDao.getMaxId(TABLE_NAME);
+
         question = (Question) dbDao.findRecordById(TABLE_NAME, maxId);
         assertEquals(expected, question.getBody());
         assertEquals(SYNC_FLAG_SERVER_ADD, Integer.parseInt(question.getSyncflag()));
 
         //For debug purpose
         Log.d(TAG, "insert2ServerTest: " + question.toString());
+
+        //Clean db.
+        dbDao.delRecord(TABLE_NAME, maxId);
     }
 
     @Test
@@ -279,12 +309,15 @@ public class DBUnitTest {
         Long orgId = question.getId();
         String orgLastmodify = question.getLastmodify();
         question.setSyncflag(Integer.toString(SYNC_FLAG_LOCAL_ADD));
+        Log.d(TAG, "sync2ServerTestLocalAdd: org id " + orgId + " " + orgLastmodify);
 
         Map<String, Object> map = dbDao.sync2Server(TABLE_NAME, question);
         assertTrue(map != null);
 
         Long newId =  (long) map.get(DB_QUESTION_TABLE_ID);
         String newLastModify = (String ) map.get(DB_QUESTION_TABLE_LASTMODIFY);
+        Log.d(TAG, "sync2ServerTestLocalAdd: new id " + newId + " " + newLastModify);
+
 
         question = (Question) dbDao.findRecordById(TABLE_NAME, newId);
         assertEquals(expected, question.getBody());
@@ -295,6 +328,9 @@ public class DBUnitTest {
         int syncflag = Integer.parseInt(question.getSyncflag());
 
         assertEquals(SYNC_FLAG_SERVER_ADD, syncflag);
+
+        //clean db
+        dbDao.delRecord(TABLE_NAME, newId);
 
     }
 
@@ -311,7 +347,8 @@ public class DBUnitTest {
         question.setId(ID_FOR_TEST);
         question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
         String orgLastmodify = question.getLastmodify();
-        dbDao.insert2Server(TABLE_NAME, question);
+        dbDao.insertRecord(TABLE_NAME, question);
+        Log.d(TAG, "sync2ServerTestLocalModify: org lastmodify " + orgLastmodify);
 
         //Verify that id should NOT be changed,
         // lastdodify and syncflag of a record should be changed after sync2server.
@@ -323,6 +360,7 @@ public class DBUnitTest {
 
         Long newId =  (long) map.get(DB_QUESTION_TABLE_ID);
         String newLastModify = (String ) map.get(DB_QUESTION_TABLE_LASTMODIFY);
+        Log.d(TAG, "sync2ServerTestLocalModify: new id " + newId + " " + newLastModify);
 
         Question question2 = (Question) dbDao.findRecordById(TABLE_NAME, newId);
         Log.d(TAG, "sync2ServerTestLocalModify: getBody" + question2.getBody());
@@ -353,7 +391,7 @@ public class DBUnitTest {
         question.setId(ID_FOR_TEST);
         question.setSyncflag(Integer.toString(SYNC_FLAG_SERVER_ADD));
 
-        dbDao.sync2Local(TABLE_NAME, question);
+        dbDao.insertRecord(TABLE_NAME, question);
         question = (Question) dbDao.findRecordById(TABLE_NAME, ID_FOR_TEST);
         assertEquals(toBeUpdated, question.getBody());
         Log.d(TAG, "updateRecordTest: " + question.getBody());
